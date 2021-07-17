@@ -1,0 +1,44 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 91773b89097927a2393bc5223295d37ed26e1632
+    hooks:
+      - id: black
+        name: black
+        language_version: python3
+
+  - repo: https://github.com/myint/docformatter
+    rev: 67919ee01837761f2d954d7fbb08c12cdd38ec5a  # frozen: v1.4
+    hooks:
+      - id: docformatter
+        name: docformatter
+        args:
+          [
+            --check,
+            --recursive,
+            --wrap-summaries=88,
+            --wrap-descriptions=88,
+            --pre-summary-newline,
+            --make-summary-multi-line,
+          ]
+
+  - repo: https://github.com/PyCQA/isort
+    rev: c467a98e06b8f65a757263c063231582c413d8ab
+    hooks:
+      - id: isort
+        name: isort
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]

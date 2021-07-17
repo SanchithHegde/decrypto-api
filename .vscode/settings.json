@@ -1,0 +1,39 @@
+{
+  "editor.formatOnSave": true,
+
+  "files.associations": {
+    ".env.sample": "dotenv"
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/.mypy_cache": true,
+    "**/__pycache__": true,
+    "**/.pylint.d": true,
+    "**/.venv": true
+  },
+
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.linting.pylintEnabled": true,
+
+  // This setting is needed for pylint to pick up configuration from pyproject.toml file.
+  // Won't be necessary after this issue is closed:
+  // https://github.com/microsoft/vscode-python/issues/11995
+  "python.linting.pylintUseMinimalCheckers": false,
+
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "editor.formatOnPaste": false,
+    "editor.renderFinalNewline": true,
+    "editor.rulers": [88],
+    "editor.trimAutoWhitespace": true,
+
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
+  }
+}
