@@ -24,13 +24,17 @@ from app.utils import (
 router = APIRouter(tags=["login"])
 
 
-@router.post("/login/access-token", response_model=schemas.Token)
+@router.post(
+    "/login/access-token",
+    response_model=schemas.Token,
+    summary="Obtain a login access token",
+)
 def login_access_token(
     db_session: Session = Depends(dependencies.get_db_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Any:
     """
-    OAuth2 compatible token login, get an access token for future requests.
+    Obtain an OAuth2 compatible access token, which can be used for future requests.
     """
 
     user = crud.user.authenticate(
@@ -50,23 +54,33 @@ def login_access_token(
     }
 
 
-@router.post("/login/test-token", response_model=schemas.User)
+@router.post(
+    "/login/test-token",
+    response_model=schemas.User,
+    summary="Test the obtained access token",
+)
 def test_token(
     current_user: models.User = Depends(dependencies.get_current_user),
 ) -> Any:
     """
-    Test access token.
+    Test the obtained access token.
+
+    If the access token sent with the request is correct, returns the user's details.
     """
 
     return current_user
 
 
-@router.post("/password-recovery/{email}", response_model=schemas.Message)
+@router.post(
+    "/password-recovery/{email}",
+    response_model=schemas.Message,
+    summary="Send a password recovery email",
+)
 def recover_password(
     email: str, db_session: Session = Depends(dependencies.get_db_session)
 ) -> Any:
     """
-    Password Recovery.
+    Send a password recovery email to the provided email address.
     """
 
     user = crud.user.get_by_email(db_session, email=email)
@@ -87,14 +101,21 @@ def recover_password(
     return {"message": "Password recovery email sent"}
 
 
-@router.post("/reset-password/", response_model=schemas.Message)
+@router.post(
+    "/reset-password/",
+    response_model=schemas.Message,
+    summary="Reset a user's password",
+)
 def reset_password(
     token: str = Body(...),
     new_password: str = Body(...),
     db_session: Session = Depends(dependencies.get_db_session),
 ) -> Any:
     """
-    Reset password.
+    Reset a user's password with the provided password.
+
+    The token would be included as part of the "reset password" link sent by email to
+    the user.
     """
 
     email = verify_password_reset_token(token)

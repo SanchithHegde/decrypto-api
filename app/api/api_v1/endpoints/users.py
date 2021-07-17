@@ -17,7 +17,7 @@ from app.utils import send_new_account_email
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("/", response_model=List[schemas.User])
+@router.get("/", response_model=List[schemas.User], summary="Obtain a list of users")
 def read_users(
     db_session: Session = Depends(dependencies.get_db_session),
     skip: int = 0,
@@ -25,7 +25,10 @@ def read_users(
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
-    Retrieve users.
+    Obtain a list of users starting at offset `skip` and containing a maximum of `limit`
+    number of instances.
+
+    **Needs superuser privileges.**
     """
 
     users = crud.user.get_multi(db_session, skip=skip, limit=limit)
@@ -33,7 +36,9 @@ def read_users(
     return users
 
 
-@router.post("/", response_model=schemas.User)
+@router.post(
+    "/", response_model=schemas.User, summary="Create a new user as a superuser"
+)
 def create_user(
     *,
     db_session: Session = Depends(dependencies.get_db_session),
@@ -41,7 +46,9 @@ def create_user(
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
-    Create new user.
+    Create a new user with the provided details.
+
+    **Needs superuser privileges.**
     """
 
     user = crud.user.get_by_email(db_session, email=user_in.email)
@@ -62,7 +69,7 @@ def create_user(
     return user
 
 
-@router.put("/me", response_model=schemas.User)
+@router.put("/me", response_model=schemas.User, summary="Update own user")
 def update_user_me(
     *,
     db_session: Session = Depends(dependencies.get_db_session),
@@ -92,18 +99,24 @@ def update_user_me(
     return user
 
 
-@router.get("/me", response_model=schemas.User)
+@router.get(
+    "/me", response_model=schemas.User, summary="Obtain the details of the user"
+)
 def read_user_me(
     current_user: models.User = Depends(dependencies.get_current_user),
 ) -> Any:
     """
-    Get current user.
+    Obtain the details of the user.
     """
 
     return current_user
 
 
-@router.post("/open", response_model=schemas.User)
+@router.post(
+    "/open",
+    response_model=schemas.User,
+    summary="Create a new user without the need to be logged in",
+)
 def create_user_open(
     *,
     db_session: Session = Depends(dependencies.get_db_session),
@@ -112,7 +125,7 @@ def create_user_open(
     full_name: str = Body(None),
 ) -> Any:
     """
-    Create new user without the need to be logged in.
+    Create a new user without the need to be logged in.
     """
 
     if not settings.USERS_OPEN_REGISTRATION:
@@ -140,14 +153,23 @@ def create_user_open(
     return user
 
 
-@router.get("/{user_id}", response_model=schemas.User)
+@router.get(
+    "/{user_id}",
+    response_model=schemas.User,
+    summary="Obtain a user's details given the user ID",
+)
 def read_user_by_id(
     user_id: int,
     current_user: models.User = Depends(dependencies.get_current_user),
     db_session: Session = Depends(dependencies.get_db_session),
 ) -> Any:
     """
-    Get a specific user by id.
+    Obtain a user's details given the user ID.
+
+    The behavior can be explained as follows:
+
+    * If the user is not a superuser, they can only obtain their own details.
+    * If the user is a superuser, they can obtain any user's details.
     """
 
     user = crud.user.get(db_session, identifier=user_id)
@@ -163,7 +185,11 @@ def read_user_by_id(
     return user
 
 
-@router.put("/{user_id}", response_model=schemas.User)
+@router.put(
+    "/{user_id}",
+    response_model=schemas.User,
+    summary="Update a user's details given the user ID",
+)
 def update_user(
     *,
     db_session: Session = Depends(dependencies.get_db_session),
@@ -172,7 +198,9 @@ def update_user(
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
-    Update a user.
+    Update a user's details given the user ID.
+
+    **Needs superuser privileges.**
     """
 
     user = crud.user.get(db_session, identifier=user_id)
