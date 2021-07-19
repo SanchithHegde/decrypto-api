@@ -56,7 +56,7 @@ def create_user(
     if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The user with this username already exists in the system.",
+            detail="The user with this email address already exists in the system.",
         )
 
     user = crud.user.create(db_session, obj_in=user_in)
@@ -181,6 +181,12 @@ def read_user_by_id(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The user doesn't have enough privileges",
+        )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The user with this user ID does not exist in the system",
         )
 
     return user

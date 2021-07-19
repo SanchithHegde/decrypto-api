@@ -44,7 +44,7 @@ def login_access_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email or password",
+            detail="Incorrect email address or password",
         )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -91,7 +91,7 @@ def recover_password(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="The user with this username does not exist in the system.",
+            detail="The user with this email address does not exist in the system.",
         )
 
     assert user.email is not None
@@ -133,7 +133,7 @@ def reset_password(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="The user with this username does not exist in the system.",
+            detail="The user with this email address does not exist in the system.",
         )
 
     current_user_data = jsonable_encoder(user)
