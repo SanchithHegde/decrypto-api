@@ -19,9 +19,9 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/", response_model=List[schemas.User], summary="Obtain a list of users")
 def read_users(
-    db_session: Session = Depends(dependencies.get_db_session),
     skip: int = 0,
     limit: int = 100,
+    db_session: Session = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -41,8 +41,8 @@ def read_users(
 )
 def create_user(
     *,
-    db_session: Session = Depends(dependencies.get_db_session),
     user_in: schemas.UserCreate,
+    db_session: Session = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -72,10 +72,10 @@ def create_user(
 @router.put("/me", response_model=schemas.User, summary="Update own user")
 def update_user_me(
     *,
-    db_session: Session = Depends(dependencies.get_db_session),
     password: str = Body(None),
     full_name: str = Body(None),
     email: EmailStr = Body(None),
+    db_session: Session = Depends(dependencies.get_db_session),
     current_user: models.User = Depends(dependencies.get_current_user),
 ) -> Any:
     """
@@ -119,10 +119,10 @@ def read_user_me(
 )
 def create_user_open(
     *,
-    db_session: Session = Depends(dependencies.get_db_session),
     password: str = Body(...),
     email: EmailStr = Body(...),
     full_name: str = Body(None),
+    db_session: Session = Depends(dependencies.get_db_session),
 ) -> Any:
     """
     Create a new user without the need to be logged in.
@@ -160,8 +160,8 @@ def create_user_open(
 )
 def read_user_by_id(
     user_id: int,
-    current_user: models.User = Depends(dependencies.get_current_user),
     db_session: Session = Depends(dependencies.get_db_session),
+    current_user: models.User = Depends(dependencies.get_current_user),
 ) -> Any:
     """
     Obtain a user's details given the user ID.
@@ -192,9 +192,9 @@ def read_user_by_id(
 )
 def update_user(
     *,
-    db_session: Session = Depends(dependencies.get_db_session),
     user_id: int,
     user_in: schemas.UserUpdate,
+    db_session: Session = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
