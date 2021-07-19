@@ -2,8 +2,9 @@
 Base class for all SQLAlchemy model definitions.
 """
 
-from typing import Any
+from typing import Any, Dict
 
+from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import Mapped
 
@@ -11,7 +12,7 @@ from app.core.config import settings
 
 
 @as_declarative()
-class Base:  # pylint: disable=too-few-public-methods
+class Base:
     """
     Base class for all SQLAlchemy model definitions.
     """
@@ -29,3 +30,10 @@ class Base:  # pylint: disable=too-few-public-methods
         class_name = cls.__name__.lower()
 
         return f"{project_name}_{class_name}"
+
+    def dict(self) -> Dict[str, Any]:
+        """
+        Convert the model instance into a dictionary.
+        """
+
+        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
