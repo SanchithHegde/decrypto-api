@@ -208,7 +208,7 @@ def update_user(
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="The user with this username does not exist in the system",
+            detail="The user with this user ID does not exist in the system",
         )
 
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in)
