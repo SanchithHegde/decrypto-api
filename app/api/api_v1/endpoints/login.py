@@ -6,7 +6,7 @@ recovery.
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -42,7 +42,10 @@ def login_access_token(
     )
 
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password",
+        )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
@@ -87,7 +90,7 @@ def recover_password(
 
     if not user:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="The user with this username does not exist in the system.",
         )
 
@@ -121,13 +124,15 @@ def reset_password(
     email = verify_password_reset_token(token)
 
     if not email:
-        raise HTTPException(status_code=400, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token"
+        )
 
     user = crud.user.get_by_email(db_session, email=email)
 
     if not user:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="The user with this username does not exist in the system.",
         )
 
