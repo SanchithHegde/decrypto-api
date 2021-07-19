@@ -1,3 +1,4 @@
+exclude: "alembic/"
 repos:
   - repo: https://github.com/psf/black
     rev: 91773b89097927a2393bc5223295d37ed26e1632
@@ -7,7 +8,7 @@ repos:
         language_version: python3
 
   - repo: https://github.com/myint/docformatter
-    rev: 67919ee01837761f2d954d7fbb08c12cdd38ec5a  # frozen: v1.4
+    rev: 67919ee01837761f2d954d7fbb08c12cdd38ec5a # frozen: v1.4
     hooks:
       - id: docformatter
         name: docformatter
