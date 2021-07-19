@@ -14,7 +14,7 @@ class UserBase(BaseModel):
 
     email: Optional[EmailStr] = None
     is_superuser: bool = False
-    full_name: str
+    full_name: Optional[str] = None
 
 
 class UserCreate(UserBase):
@@ -25,6 +25,7 @@ class UserCreate(UserBase):
 
     email: EmailStr
     password: str
+    full_name: str
 
 
 class UserUpdate(UserBase):
