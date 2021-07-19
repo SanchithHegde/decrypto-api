@@ -55,6 +55,8 @@ def get_current_user(
             detail="Could not validate credentials",
         )
 
+    assert token_data.sub is not None
+
     user = crud.user.get(db_session, identifier=token_data.sub)
     if not user:
         raise HTTPException(

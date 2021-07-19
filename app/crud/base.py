@@ -32,7 +32,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         self.model = model
 
-    def get(self, db_session: Session, identifier: Any) -> Optional[ModelType]:
+    def get(self, db_session: Session, identifier: int) -> Optional[ModelType]:
         """
         Obtain model instance by `identifier`.
 
