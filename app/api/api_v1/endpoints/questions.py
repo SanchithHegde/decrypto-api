@@ -132,6 +132,9 @@ def read_question_by_id(
     return question
 
 
+# Using PATCH since we're only updating the answer, or in other words, applying a
+# partial modification to a resource.
+# Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
 @router.patch(
     "/{question_id}",
     response_model=schemas.Question,
