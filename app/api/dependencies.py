@@ -4,7 +4,7 @@ Dependencies used by FastAPI for its dependency injection system.
 
 from typing import Generator
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, File, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt  # type: ignore
 from pydantic import ValidationError
@@ -82,3 +82,23 @@ def get_current_superuser(
         )
 
     return current_user
+
+
+def get_image(image: UploadFile = File(...)) -> UploadFile:
+    """
+    Provides the file if it has a MIME type corresponding to an image.
+
+    Returns an `HTTPException` if the MIME type does not correspond to an image.
+    """
+
+    # Accept only JPEG and PNG images
+    # Reference: https://en.wikipedia.org/wiki/Media_type
+    image_mime_types = ["image/jpeg", "image/png"]
+
+    if image.content_type not in image_mime_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File is not a JPEG or a PNG image",
+        )
+
+    return image
