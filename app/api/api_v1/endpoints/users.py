@@ -119,9 +119,7 @@ def read_user_me(
 )
 def create_user_open(
     *,
-    password: str = Body(...),
-    email: EmailStr = Body(...),
-    full_name: str = Body(None),
+    user_in: schemas.UserCreate,
     db_session: Session = Depends(dependencies.get_db_session),
 ) -> Any:
     """
@@ -134,7 +132,7 @@ def create_user_open(
             detail="Open user registration is forbidden on this server",
         )
 
-    user = crud.user.get_by_email(db_session, email=email)
+    user = crud.user.get_by_email(db_session, email=user_in.email)
 
     if user:
         raise HTTPException(
@@ -142,7 +140,6 @@ def create_user_open(
             detail="The user with this email address already exists in the system",
         )
 
-    user_in = schemas.UserCreate(password=password, email=email, full_name=full_name)
     user = crud.user.create(db_session, obj_in=user_in)
 
     if settings.EMAILS_ENABLED and user_in.email:
