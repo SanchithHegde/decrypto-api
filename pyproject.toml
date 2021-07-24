@@ -22,7 +22,6 @@ coloredlogs      = "^15.0.1"
 
 [tool.poetry.dev-dependencies]
 black             = { version = "^21.6b0", allow-prereleases = true }
-coverage          = { extras = [ "toml" ], version = "^5.5", allow-prereleases = true }
 docformatter      = { version = "^1.4", allow-prereleases = true }
 isort             = { version = "^5.9.2", allow-prereleases = true }
 mypy              = { version = "^0.910", allow-prereleases = true }
@@ -53,10 +52,3 @@ disable = []
 
 [tool.pylint.reports]
 output-format = "colorized"
-
-[tool.coverage.run]
-omit = [
-    "app/backend_pre_start.py",
-    "app/initial_data.py",
-    "app/tests_pre_start.py",
-]
