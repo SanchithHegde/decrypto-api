@@ -2,7 +2,13 @@
 
 set -euxo pipefail
 
-export PYTHONPATH=.
+export PYTHONPATH="."
+export POSTGRES_DB="decrypto_test"
+
+# Run prestart.sh script in the "scripts" directory before starting
+PRE_START_PATH="scripts/prestart.sh"
+echo "Running pre-start script ${PRE_START_PATH}"
+sh "${PRE_START_PATH}"
 
 if [ $(uname -s) = "Linux" ]; then
   echo "Removing __pycache__ files"
