@@ -24,8 +24,7 @@ router = APIRouter(prefix="/questions", tags=["questions"])
 
 @router.get(
     "/",
-    response_model=List[schemas.QuestionAnswer],
-    response_model_exclude={"content", "content_type"},
+    response_model=List[schemas.QuestionListItem],
     summary="Obtain a list of questions",
 )
 def read_questions(
@@ -48,7 +47,7 @@ def read_questions(
 
 @router.post(
     "/",
-    response_model=schemas.QuestionAnswer,
+    response_model=schemas.QuestionListItem,
     summary="Add a new question",
 )
 async def create_question(
@@ -137,7 +136,7 @@ def read_question_by_id(
 # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
 @router.patch(
     "/{question_id}",
-    response_model=schemas.Question,
+    response_model=schemas.QuestionListItem,
     summary="Update a question's details given the question ID",
 )
 async def update_question(
