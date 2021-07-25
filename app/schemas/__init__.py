@@ -8,6 +8,7 @@ from app.schemas.question import (
     QuestionAnswer,
     QuestionCreate,
     QuestionInDB,
+    QuestionListItem,
     QuestionUpdate,
 )
 from app.schemas.token import Token, TokenPayload

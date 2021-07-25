@@ -32,10 +32,10 @@ class QuestionUpdate(BaseModel):
     question details.
     """
 
-    answer: Optional[str] = None
+    answer: str
 
 
-class QuestionInDBBase(QuestionBase):
+class QuestionInDBBase(BaseModel):
     """
     Pydantic question schema containing common attributes of all schemas representing a
     question stored in the database.
@@ -54,19 +54,24 @@ class QuestionInDBBase(QuestionBase):
         orm_mode = True
 
 
-class Question(QuestionInDBBase):
+class Question(QuestionBase, QuestionInDBBase):
     """
     Pydantic question schema containing attributes returned via the API.
     """
 
 
-class QuestionAnswer(Question):
+class QuestionListItem(QuestionInDBBase, QuestionUpdate):
+    """
+    Pydantic question schema containing attributes returned via the API when a list of
+    questions is returned.
+    """
+
+
+class QuestionAnswer(Question, QuestionUpdate):
     """
     Pydantic question schema containing attributes returned via the API for superuser
     interaction only.
     """
-
-    answer: str
 
 
 class QuestionInDB(QuestionAnswer):
