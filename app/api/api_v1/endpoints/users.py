@@ -119,9 +119,9 @@ def read_user_me(
 )
 def create_user_open(
     *,
-    password: str = Body(...),
+    full_name: str = Body(...),
     email: EmailStr = Body(...),
-    full_name: str = Body(None),
+    password: str = Body(...),
     db_session: Session = Depends(dependencies.get_db_session),
 ) -> Any:
     """
