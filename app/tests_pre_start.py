@@ -7,7 +7,7 @@ import logging
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 
 from app import LOGGER
-from app.db.session import SessionLocal
+from app.tests.conftest import TestingSessionLocal
 
 # Wait for 5 minutes, stopping for 1 second after an unsuccessful try
 MAX_TRIES = 60 * 5
@@ -28,7 +28,7 @@ def verify_db_connectivity() -> None:
     try:
         # Try to create a session and execute a statement to check if database is
         # available
-        db_session = SessionLocal()
+        db_session = TestingSessionLocal()
         db_session.execute("SELECT 1;")  # type: ignore
 
     except Exception as exception:
