@@ -205,7 +205,6 @@ def test_update_existing_question(
 
     updated_question = response.json()
 
-    print(updated_question)
     assert updated_question
     assert "id" in updated_question
     assert "answer" in updated_question
