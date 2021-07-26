@@ -10,6 +10,10 @@ from fastapi.testclient import TestClient
 from app.core.config import settings
 
 
+def random_int() -> int:
+    return random.randint(1, 1_000_000)
+
+
 def random_lower_string() -> str:
     return "".join(random.choices(string.ascii_lowercase, k=32))
 
