@@ -2,7 +2,7 @@
 CRUD operations on `QuestionOrderItem` model instances.
 """
 
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 
 from sqlalchemy.orm import Session
 
@@ -48,6 +48,35 @@ class CRUDQuestionOrderItem(
             .filter(QuestionOrderItem.question_id == question_id)
             .first()
         )
+
+    def update(  # pylint: disable=no-self-use
+        self,
+        db_session: Session,
+        *,
+        db_obj: QuestionOrderItem,
+        obj_in: Union[QuestionOrderItemUpdate, Dict[str, Any]]
+    ) -> QuestionOrderItem:
+        """
+        Update question order item with fields and values specified by `obj_in`.
+        """
+
+        obj_data = db_obj.dict()
+
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
+
+        for field in obj_data:
+            if field in update_data:
+                setattr(db_obj, field, update_data[field])
+
+        db_session.add(db_obj)
+        db_session.commit()
+        db_session.refresh(db_obj)
+
+        return db_obj
 
 
 question_order_item = CRUDQuestionOrderItem(QuestionOrderItem)
