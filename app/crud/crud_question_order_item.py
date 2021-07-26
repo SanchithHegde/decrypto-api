@@ -60,6 +60,8 @@ class CRUDQuestionOrderItem(
         Update question order item with fields and values specified by `obj_in`.
         """
 
+        # Using db_obj.dict() method since jsonable_encoder() tries to encode raw image
+        # bytes as UTF-8, which would fail for obvious reasons.
         obj_data = db_obj.dict()
 
         if isinstance(obj_in, dict):
