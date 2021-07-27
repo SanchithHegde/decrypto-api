@@ -82,7 +82,7 @@ jobs:
           FIRST_SUPERUSER_PASSWORD: "user_password"
           FIRST_SUPERUSER_NAME: "Username"
           USERS_OPEN_REGISTRATION: "True"
-          POSTGRES_SERVER: "postgres:5432"
+          POSTGRES_SERVER: "localhost:5432"
           POSTGRES_USER: "decrypto_user"
           POSTGRES_PASSWORD: "decrypto_password"
           POSTGRES_DB: "decrypto"
