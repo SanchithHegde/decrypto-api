@@ -17,8 +17,6 @@ on:
       - "app/**"
       - "alembic/**"
 
-  workflow_dispatch:
-
 jobs:
   test:
     runs-on: ${{ matrix.os }}
