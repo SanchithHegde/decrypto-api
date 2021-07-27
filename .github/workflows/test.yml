@@ -86,4 +86,4 @@ jobs:
         run: |
           source .venv/bin/activate
           python app/tests_pre_start.py
-          pytest --cov=app --cov-report=term-missing app/tests
+          PYTHONPATH="." pytest --cov=app --cov-report=term-missing app/tests
