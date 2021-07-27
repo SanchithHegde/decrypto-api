@@ -15,7 +15,7 @@ psycopg2         = "^2.9.1"
 pydantic         = { extras = [ "dotenv", "email" ], version = "^1.8.2" }
 python-jose      = { extras = [ "cryptography" ], version = "^3.3.0" }
 python-multipart = "^0.0.5"
-SQLAlchemy       = "^1.4.20"
+SQLAlchemy       = "^1.4.22"
 tenacity         = "^8.0.1"
 uvicorn          = { extras = [ "standard" ], version = "^0.14.0" }
 coloredlogs      = "^15.0.1"
