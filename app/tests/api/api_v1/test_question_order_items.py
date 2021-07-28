@@ -201,6 +201,22 @@ def test_update_existing_question_order_item_new_question_id(
     assert updated_question_order_item["question_id"] == new_question_id
 
 
+def test_update_existing_question_order_item_not_existing_question_id(
+    client: TestClient, superuser_token_headers: Dict[str, str], db_session: Session
+) -> None:
+    question_order_item = create_random_question_order_item(db_session)
+    question_order_item_id = question_order_item.id
+    new_question_id = -1
+    data = {"question_id": new_question_id}
+    response = client.put(
+        f"{settings.API_V1_STR}/questions_order/{question_order_item_id}",
+        headers=superuser_token_headers,
+        json=data,
+    )
+
+    assert response.status_code == 404
+
+
 def test_update_not_existing_question_order_item(
     client: TestClient, superuser_token_headers: Dict[str, str]
 ) -> None:
