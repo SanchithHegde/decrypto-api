@@ -221,3 +221,33 @@ def update_user(
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in)
 
     return user
+
+
+@router.delete(
+    "/{user_id}",
+    response_model=schemas.Message,
+    summary="Delete a user given the user ID",
+)
+def delete_user(
+    *,
+    user_id: int,
+    db_session: Session = Depends(dependencies.get_db_session),
+    _: models.User = Depends(dependencies.get_current_superuser),
+) -> Any:
+    """
+    Delete a user given the user ID.
+
+    **Needs superuser privileges.**
+    """
+
+    user = crud.user.get(db_session, identifier=user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The user with this user ID does not exist in the system",
+        )
+
+    user = crud.user.remove(db_session, identifier=user_id)
+
+    return {"message": "User deleted successfully"}

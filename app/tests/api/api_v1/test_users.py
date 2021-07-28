@@ -279,3 +279,28 @@ def test_update_user_not_existing_user(
     )
 
     assert response.status_code == 404
+
+
+def test_delete_user_existing_user(
+    client: TestClient, superuser_token_headers: Dict[str, str], db_session: Session
+) -> None:
+    user = create_random_user(db_session)
+    user_id = user.id
+    response = client.delete(
+        f"{settings.API_V1_STR}/users/{user_id}",
+        headers=superuser_token_headers,
+    )
+
+    assert 200 <= response.status_code < 300
+
+
+def test_delete_user_not_existing_user(
+    client: TestClient, superuser_token_headers: Dict[str, str]
+) -> None:
+    user_id = -1
+    response = client.delete(
+        f"{settings.API_V1_STR}/users/{user_id}",
+        headers=superuser_token_headers,
+    )
+
+    assert response.status_code == 404

@@ -108,3 +108,26 @@ def test_update_user(db_session: Session) -> None:
     assert user_2.hashed_password  # Required for mypy
     assert user.email == user_2.email
     assert verify_password(new_password, user_2.hashed_password)
+
+
+def test_delete_user(db_session: Session) -> None:
+    password = random_lower_string()
+    username = random_email()
+    full_name = random_lower_string()
+    user_in = UserCreate(
+        email=username, password=password, full_name=full_name, is_superuser=True
+    )
+    user = crud.user.create(db_session, obj_in=user_in)
+
+    assert user.id
+    deleted_user = crud.user.remove(db_session, identifier=user.id)
+
+    assert deleted_user.id == user.id
+    assert deleted_user.email == user.email
+    assert deleted_user.full_name == user.full_name
+    assert deleted_user.is_superuser == user.is_superuser
+    assert deleted_user.dict() == user.dict()
+
+    result = crud.user.get(db_session, identifier=user.id)
+
+    assert result is None
