@@ -11,8 +11,8 @@ fi
 
 python app/tests_pre_start.py
 
-pytest --cov=app --cov-report=term-missing app/tests "${@}"
+pytest --cov=app --cov-config=pyproject.toml --cov-report=term-missing app/tests "${@}"
 
 # If HTML coverage reports are required, comment above line and uncomment below line
-# pytest --cov=app --cov-report=term-missing --cov-report=html app/tests "${@}"
+# pytest --cov=app --cov-config=pyproject.toml --cov-report=term-missing --cov-report=html app/tests "${@}"
 
