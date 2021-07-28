@@ -8,14 +8,14 @@ on:
       - "**/pyproject.toml"
       - "**/poetry.lock"
       - "app/**"
-      - "alembic/**"
 
   push:
+    branches:
+      - main
     paths:
       - "**/pyproject.toml"
       - "**/poetry.lock"
       - "app/**"
-      - "alembic/**"
 
 jobs:
   test:
