@@ -35,4 +35,6 @@ class QuestionOrderItem(Base):  # pylint: disable=too-few-public-methods
         DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
     )
 
-    question: Mapped["Question"] = relationship("Question")
+    question: Mapped["Question"] = relationship(
+        "Question", uselist=False, viewonly=True
+    )
