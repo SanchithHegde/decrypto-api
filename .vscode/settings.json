@@ -10,6 +10,7 @@
     "**/.mypy_cache": true,
     "**/__pycache__": true,
     "**/.pylint.d": true,
+    "**/.pytest_cache": true,
     "**/.venv": true
   },
 
@@ -17,11 +18,18 @@
   "python.linting.enabled": true,
   "python.linting.mypyEnabled": true,
   "python.linting.pylintEnabled": true,
+  "python.linting.ignorePatterns": [
+    "**/site-packages/**/*.py",
+    ".vscode/*.py",
+    "alembic/**/*.py"
+  ],
 
   // This setting is needed for pylint to pick up configuration from pyproject.toml file.
   // Won't be necessary after this issue is closed:
   // https://github.com/microsoft/vscode-python/issues/11995
   "python.linting.pylintUseMinimalCheckers": false,
+
+  "python.testing.pytestEnabled": true,
 
   "[python]": {
     "editor.codeActionsOnSave": {
