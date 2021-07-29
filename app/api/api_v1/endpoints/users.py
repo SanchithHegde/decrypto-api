@@ -2,9 +2,10 @@
 API endpoints for user operations.
 """
 
-from typing import Any, List
+import base64
+from typing import Any, List, Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
@@ -151,6 +152,36 @@ def create_user_open(
         )
 
     return user
+
+
+@router.get(
+    "/question",
+    response_model=schemas.Question,
+    responses={
+        200: {
+            "content": {"image/jpeg": {}, "image/png": {}},
+        }
+    },
+    summary="Obtain the current question for the user",
+)
+def read_user_question(
+    image: Optional[bool] = None,
+    current_user: models.User = Depends(dependencies.get_current_user),
+) -> Any:
+    """
+    Obtain the current question for the user.
+
+    If `image` is `true`, returns the image with the appropriate `Content-Type` header.
+    """
+
+    question = current_user.question
+
+    if image:
+        return Response(content=question.content, media_type=question.content_type)
+
+    question.content = base64.b64encode(question.content)
+
+    return question
 
 
 @router.get(

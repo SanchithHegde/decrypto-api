@@ -2,9 +2,15 @@
 SQLAlchemy models for handling user operations.
 """
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy.orm import Mapped, relationship
 
 from app.db.base_class import Base
+
+if TYPE_CHECKING:
+    from app.models import Question
 
 
 class User(Base):  # pylint: disable=too-few-public-methods
@@ -17,3 +23,44 @@ class User(Base):  # pylint: disable=too-few-public-methods
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_superuser = Column(Boolean(), default=False)
+    question_number = Column(Integer, nullable=False, default=1)
+
+    question: Mapped["Question"] = relationship(
+        "Question",
+        foreign_keys=[question_number],
+        primaryjoin=(
+            "and_("
+            "User.question_number == remote(QuestionOrderItem.question_number), "
+            "QuestionOrderItem.question_id == foreign(Question.id)"
+            ")"
+        ),
+        uselist=False,
+        viewonly=True,
+    )
+
+    # We are NOT setting a FOREIGN KEY constraint referencing
+    # `QuestionOrderItem.question_number` as it causes inconsistencies in the situations
+    # outlined below:
+    # * Q: What would the question number of the first user created (the first superuser
+    #      usually) be?
+    #   A: To solve this, we can allow `question_number` to be NULL, but we'd have to
+    #      add an extra condition check while serving a question to the user, to return
+    #      the first question if `question_number` is NULL.
+    #
+    # * Q: What do we do when the `QuestionOrderItem` record that this refers to is
+    #      updated/ What should we set ON UPDATE as?
+    #   A: Since updating the `question_number` on the `QuestionOrderItem` instance can
+    #      end up increasing or decreasing the user's "level" to the new value, we
+    #      definitely don't want CASCADE. We can't set to NULL either, that would drop
+    #      all affected users to level 1 and they'd have to start all over again.
+    #
+    # * Q: Same question with ON DELETE.
+    #   A: We definitely don't want to drop `User` records, so we don't want CASCADE.
+    #      Setting to NULL causes the same issue outlined above.
+    #
+    # * Q: What happens when a user reaches "the end"? The `question_number` would refer
+    #      to say question 101, but question 101 does not exist in `QuestionOrderItem`,
+    #      so the database wouldn't allow setting the value in this table to 101, to
+    #      maintain consistency.
+    #   A: When this happens, the user would end up seeing the last question over and
+    #      over again, even if they got the answer for it right. (expected outcome)
