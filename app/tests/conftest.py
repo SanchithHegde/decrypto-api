@@ -24,10 +24,6 @@ assert settings.SQLALCHEMY_TEST_DATABASE_URI
 engine = create_engine(settings.SQLALCHEMY_TEST_DATABASE_URI, pool_pre_ping=True)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-LOGGER.info("Creating tables")
-Base.metadata.create_all(bind=engine)  # pylint: disable=no-member
-LOGGER.info("Tables created")
-
 
 def override_get_db_session() -> Generator:
     try:
@@ -38,19 +34,29 @@ def override_get_db_session() -> Generator:
         db_session.close()
 
 
-# Dependency overrides
-# Reference: https://fastapi.tiangolo.com/advanced/testing-database/
-app.dependency_overrides[get_db_session] = override_get_db_session
+@pytest.fixture(scope="session", autouse=True)
+def create_tables() -> Generator:
+    LOGGER.info("Creating tables")
+    Base.metadata.create_all(bind=engine)  # pylint: disable=no-member
+    LOGGER.info("Tables created")
 
+    # Dependency overrides
+    # Reference: https://fastapi.tiangolo.com/advanced/testing-database/
+    app.dependency_overrides[get_db_session] = override_get_db_session
 
-def init() -> None:
+    LOGGER.info("Creating initial data")
     db_session = TestingSessionLocal()
     init_db(db_session)
+    LOGGER.info("Initial data created")
 
+    # Run tests
+    yield
 
-LOGGER.info("Creating initial data")
-init()
-LOGGER.info("Initial data created")
+    LOGGER.info("Clearing data in tables")
+    for table in reversed(Base.metadata.sorted_tables):  # pylint: disable=no-member
+        db_session.execute(table.delete())
+    db_session.commit()
+    LOGGER.info("Tables cleared")
 
 
 @pytest.fixture(scope="session")
