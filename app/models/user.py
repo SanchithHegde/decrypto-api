@@ -25,6 +25,13 @@ class User(Base):  # pylint: disable=too-few-public-methods
     is_superuser = Column(Boolean(), default=False)
     question_number = Column(Integer, nullable=False, default=1)
 
+    # SQLAlchemy relationship.
+    # This doesn't add an attribute/column to the table in the database, but provides an
+    # attribute in the model instance whose value is populated (by SQLAlchemy) when it
+    # is first accessed. The value is populated by using the foreign key and performing
+    # a suitable JOIN operation.
+    # In this case, we explicitly specify the foreign keys and the JOIN conditions that
+    # SQLAlchemy should use to populate the value.
     question: Mapped["Question"] = relationship(
         "Question",
         foreign_keys=[question_number],

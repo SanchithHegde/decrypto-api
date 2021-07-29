@@ -35,6 +35,13 @@ class QuestionOrderItem(Base):  # pylint: disable=too-few-public-methods
         DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
     )
 
+    # SQLAlchemy relationship.
+    # This doesn't add an attribute/column to the table in the database, but provides an
+    # attribute in the model instance whose value is populated (by SQLAlchemy) when it
+    # is first accessed. The value is populated by using the foreign key and performing
+    # a suitable JOIN operation.
+    # In this case, `question` is an instance of `Question` which has the same `id` as
+    # the `question_id` in `self`.
     question: Mapped["Question"] = relationship(
         "Question", uselist=False, viewonly=True
     )
