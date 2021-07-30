@@ -81,3 +81,12 @@ class QuestionInDB(QuestionAnswer):
     """
 
     updated_at: datetime
+
+
+class Answer(BaseModel):
+    """
+    Pydantic answer schema containing attributes received via the API for users to
+    answer a particular question.
+    """
+
+    answer: str

@@ -184,6 +184,38 @@ def read_user_question(
     return question
 
 
+@router.post(
+    "/answer",
+    response_model=schemas.Message,
+    summary="Verify the answer provided by the user for the current question",
+)
+def verify_user_answer(
+    answer_in: schemas.Answer,
+    db_session: Session = Depends(dependencies.get_db_session),
+    current_user: models.User = Depends(dependencies.get_current_user),
+) -> Any:
+    """
+    Verify the answer provided by the user for the current question.
+    """
+
+    question = current_user.question
+    answer = answer_in.answer
+
+    if answer != question.answer:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect answer",
+        )
+
+    # Update user's question number, and update ranks of all users
+    assert current_user.question_number
+    new_question_number = current_user.question_number + 1
+    user_update = schemas.UserUpdate(question_number=new_question_number)
+    crud.user.update(db_session, db_obj=current_user, obj_in=user_update)
+
+    return {"message": "Correct answer!"}
+
+
 @router.get(
     "/{user_id}",
     response_model=schemas.User,

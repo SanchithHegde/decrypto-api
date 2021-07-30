@@ -328,3 +328,73 @@ def test_get_question(client: TestClient, db_session: Session) -> None:
 
     assert "content" in question_data
     assert "content_type" in question_data
+
+
+def test_verify_answer_correct_answer(client: TestClient, db_session: Session) -> None:
+    question_order_item = create_random_question_order_item(db_session)
+    question_number = question_order_item.question_number
+    user = create_random_user(db_session)
+    user_in_update = UserUpdate(question_number=question_number)
+    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    assert user.email
+    normal_user_token_headers = authentication_token_from_email(
+        client=client, email=user.email, db_session=db_session
+    )
+    answer = question_order_item.question.answer
+    data = {"answer": answer}
+
+    response = client.post(
+        f"{settings.API_V1_STR}/users/answer",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+
+    assert 200 <= response.status_code < 300
+
+    assert user.id
+    assert user.rank
+    old_rank = user.rank
+    updated_user = crud.user.get(db_session, identifier=user.id)
+
+    assert updated_user
+    assert updated_user.question_number
+    assert updated_user.rank
+    assert question_number
+    assert updated_user.question_number == question_number + 1
+    assert updated_user.rank >= old_rank
+
+
+def test_verify_answer_incorrect_answer(
+    client: TestClient, db_session: Session
+) -> None:
+    question_order_item = create_random_question_order_item(db_session)
+    question_number = question_order_item.question_number
+    user = create_random_user(db_session)
+    user_in_update = UserUpdate(question_number=question_number)
+    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    assert user.email
+    normal_user_token_headers = authentication_token_from_email(
+        client=client, email=user.email, db_session=db_session
+    )
+    answer = random_lower_string()
+    data = {"answer": answer}
+
+    response = client.post(
+        f"{settings.API_V1_STR}/users/answer",
+        headers=normal_user_token_headers,
+        json=data,
+    )
+
+    assert response.status_code == 400
+
+    assert user.id
+    assert user.rank
+    old_rank = user.rank
+    unmodified_user = crud.user.get(db_session, identifier=user.id)
+
+    assert unmodified_user
+    assert unmodified_user.question_number
+    assert unmodified_user.rank
+    assert question_number
+    assert unmodified_user.question_number == question_number
+    assert unmodified_user.rank == old_rank

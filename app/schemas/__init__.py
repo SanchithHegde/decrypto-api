@@ -4,6 +4,7 @@ Pydantic schemas.
 
 from app.schemas.message import Message
 from app.schemas.question import (
+    Answer,
     Question,
     QuestionAnswer,
     QuestionCreate,
