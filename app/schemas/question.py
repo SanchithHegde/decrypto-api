@@ -41,8 +41,6 @@ class QuestionInDBBase(BaseModel):
     question stored in the database.
     """
 
-    id: Optional[int] = None
-
     class Config:  # pylint: disable=too-few-public-methods
         """
         Class used to control the behavior of pydantic for the parent class
@@ -66,8 +64,10 @@ class QuestionListItem(QuestionInDBBase, QuestionUpdate):
     questions is returned.
     """
 
+    id: Optional[int] = None
 
-class QuestionAnswer(Question, QuestionUpdate):
+
+class QuestionAnswer(QuestionBase, QuestionListItem):
     """
     Pydantic question schema containing attributes returned via the API for superuser
     interaction only.
