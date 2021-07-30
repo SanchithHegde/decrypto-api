@@ -2,6 +2,7 @@
 Pydantic schemas for user operations.
 """
 
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr
@@ -46,6 +47,7 @@ class UserInDBBase(UserBase):
 
     id: Optional[int] = None
     question_number: Optional[int] = None
+    rank: Optional[int] = None
 
     class Config:  # pylint: disable=too-few-public-methods
         """
@@ -70,3 +72,4 @@ class UserInDB(UserInDBBase):
     """
 
     hashed_password: str
+    question_number_updated_at: datetime

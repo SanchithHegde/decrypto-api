@@ -4,7 +4,7 @@ SQLAlchemy models for handling user operations.
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 from sqlalchemy.orm import Mapped, relationship
 
 from app.db.base_class import Base
@@ -24,6 +24,10 @@ class User(Base):  # pylint: disable=too-few-public-methods
     hashed_password = Column(String, nullable=False)
     is_superuser = Column(Boolean(), default=False)
     question_number = Column(Integer, nullable=False, default=1)
+    question_number_updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now()
+    )  # Used to sort users, when generating leaderboard
+    rank = Column(Integer, nullable=False, default=0)
 
     # SQLAlchemy relationship.
     # This doesn't add an attribute/column to the table in the database, but provides an

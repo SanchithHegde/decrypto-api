@@ -131,3 +131,110 @@ def test_delete_user(db_session: Session) -> None:
     result = crud.user.get(db_session, identifier=user.id)
 
     assert result is None
+
+
+def test_user_positive_rank_on_creation(db_session: Session) -> None:
+    email = random_email()
+    password = random_lower_string()
+    full_name = random_lower_string()
+    user_in = UserCreate(email=email, password=password, full_name=full_name)
+    user = crud.user.create(db_session, obj_in=user_in)
+
+    assert user.rank and user.rank > 0
+
+
+# pylint: disable=too-many-locals
+def test_user_higher_rank_on_question_number_increase(db_session: Session) -> None:
+    # "Higher rank" considering rank 1 is higher than rank 2
+
+    email1 = random_email()
+    password1 = random_lower_string()
+    full_name1 = random_lower_string()
+    user_in1 = UserCreate(email=email1, password=password1, full_name=full_name1)
+    user1 = crud.user.create(db_session, obj_in=user_in1)
+    assert user1.id
+    assert user1.question_number
+    assert user1.rank
+
+    # This test uses 2 users because if user1's previous rank was 1, then it will remain
+    # as rank 1 after updating. So, we ensure there's at least one user above user1 in
+    # the leaderboard.
+    email2 = random_email()
+    password2 = random_lower_string()
+    full_name2 = random_lower_string()
+    user_in2 = UserCreate(email=email2, password=password2, full_name=full_name2)
+    user2 = crud.user.create(db_session, obj_in=user_in2)
+    assert user2.id
+
+    # Update user2 to have higher question number and rank than user1
+    user2_in_update1 = UserUpdate(question_number=user1.question_number + 1)
+    crud.user.update(db_session, db_obj=user2, obj_in=user2_in_update1)
+    updated_user2 = crud.user.get(db_session, identifier=user2.id)
+
+    updated_user1_1 = crud.user.get(db_session, identifier=user1.id)
+    assert updated_user1_1
+    assert updated_user1_1.question_number
+    assert updated_user1_1.rank
+    old_question_number = updated_user1_1.question_number
+    old_rank = updated_user1_1.rank
+
+    assert updated_user2
+    assert updated_user2.rank and updated_user2.rank < old_rank
+
+    new_question_number = old_question_number + 1
+    user_in_update = UserUpdate(question_number=new_question_number)
+    crud.user.update(db_session, db_obj=updated_user1_1, obj_in=user_in_update)
+    updated_user1_2 = crud.user.get(db_session, identifier=user1.id)
+
+    assert updated_user1_2
+    assert (
+        updated_user1_2.question_number
+        and updated_user1_2.question_number == old_question_number + 1
+    )
+    assert updated_user1_2.rank and updated_user1_2.rank < old_rank
+
+
+def test_user_lower_rank_on_another_user_same_rank_question_number_increase(
+    db_session: Session,
+) -> None:
+    email1 = random_email()
+    password1 = random_lower_string()
+    full_name1 = random_lower_string()
+    user_in1 = UserCreate(email=email1, password=password1, full_name=full_name1)
+    user1 = crud.user.create(db_session, obj_in=user_in1)
+    assert user1.id
+    assert user1.question_number
+    assert user1.rank
+    user1_rank = user1.rank
+
+    email2 = random_email()
+    password2 = random_lower_string()
+    full_name2 = random_lower_string()
+    user_in2 = UserCreate(email=email2, password=password2, full_name=full_name2)
+    user2 = crud.user.create(db_session, obj_in=user_in2)
+    assert user2.id
+
+    # Update user2 to have same question number and rank as user1
+    user2_in_update1 = UserUpdate(question_number=user1.question_number)
+    crud.user.update(db_session, db_obj=user2, obj_in=user2_in_update1)
+    updated_user2_1 = crud.user.get(db_session, identifier=user2.id)
+
+    assert updated_user2_1
+    assert updated_user2_1.question_number
+    assert updated_user2_1.question_number == user1.question_number
+    assert updated_user2_1.rank
+    assert updated_user2_1.rank == user1_rank
+
+    # Increment user2's question number by 1
+    new_question_number = updated_user2_1.question_number + 1
+    user2_in_update2 = UserUpdate(question_number=new_question_number)
+    crud.user.update(db_session, db_obj=updated_user2_1, obj_in=user2_in_update2)
+    updated_user2_2 = crud.user.get(db_session, identifier=user2.id)
+
+    # User1 should have lower rank than user2
+    assert updated_user2_2
+    assert updated_user2_2.rank
+    assert user1_rank > updated_user2_2.rank
+
+
+# pylint: enable=too-many-locals

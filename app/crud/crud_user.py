@@ -4,7 +4,8 @@ CRUD operations on `User` model instances.
 
 from typing import Any, Dict, Optional, Union
 
-from sqlalchemy.orm import Session
+from sqlalchemy import func
+from sqlalchemy.orm import Session, aliased
 
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
@@ -39,6 +40,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         db_session.add(user_obj)
         db_session.commit()
+        self.update_ranks(db_session)
         db_session.refresh(user_obj)
 
         return user_obj
@@ -65,7 +67,24 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
 
-        return super().update(db_session, db_obj=db_obj, obj_in=update_data)
+        user_obj = super().update(db_session, db_obj=db_obj, obj_in=update_data)
+
+        if update_data.get("question_number"):
+            self.update_ranks(db_session)
+            db_session.refresh(user_obj)
+
+        return user_obj
+
+    def remove(self, db_session: Session, *, identifier: int) -> User:
+        """
+        Delete user by ID.
+        """
+
+        user_obj = super().remove(db_session, identifier=identifier)
+
+        self.update_ranks(db_session)
+
+        return user_obj
 
     def authenticate(
         self, db_session: Session, *, email: str, password: str
@@ -100,6 +119,31 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             return False
 
         return user_obj.is_superuser
+
+    @staticmethod
+    def update_ranks(db_session: Session) -> None:
+        """
+        Updates ranks of all users.
+        """
+
+        # UPDATE user SET rank=(
+        #   SELECT count(*) FROM user AS user1
+        #   WHERE user1.question_number > user.question_number
+        # ) + 1
+        # Source: https://stackoverflow.com/a/21346088
+
+        user1 = aliased(User)
+
+        # "Higher ranks" considering rank 1 is higher than rank 2
+        count_higher_ranks = (
+            db_session.query(func.count(user1.id))
+            .filter(user1.question_number > User.question_number)
+            .scalar_subquery()
+        )
+        db_session.query(User).update(
+            {User.rank: count_higher_ranks + 1}, synchronize_session=False
+        )
+        db_session.commit()
 
 
 user = CRUDUser(User)
