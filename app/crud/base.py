@@ -70,13 +70,28 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_session: Session,
         *,
         db_obj: ModelType,
-        obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+        obj_in: Union[UpdateSchemaType, Dict[str, Any]],
+        use_jsonable_encoder: bool = True
     ) -> ModelType:
         """
         Update model instance `db_obj` with fields and values specified by `obj_in`.
+
+        # Parameters
+
+        * `use_jsonable_encoder`: Specifies whether to use FastAPI's built-in
+          `jsonable_encoder` which can be used to convert an SQLAlchemy model instance
+          into a `dict`.
+          Needs to be `False` only in cases where one or more of the attributes of the
+          model instance cannot be serialized into a JSON-compatible type, such as the
+          raw bytes of a file which cannot be interpreted as text.
+          Default: `True`
         """
 
-        obj_data = jsonable_encoder(db_obj)
+        if use_jsonable_encoder:
+            obj_data = jsonable_encoder(db_obj)
+
+        else:
+            obj_data = db_obj.dict()
 
         if isinstance(obj_in, dict):
             update_data = obj_in

@@ -206,7 +206,10 @@ async def update_question_order_item(
             )
 
     question_order_item = crud.question_order_item.update(
-        db_session, db_obj=question_order_item, obj_in=question_order_item_in
+        db_session,
+        db_obj=question_order_item,
+        obj_in=question_order_item_in,
+        use_jsonable_encoder=False,
     )
 
     return question_order_item

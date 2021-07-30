@@ -2,7 +2,7 @@
 CRUD operations on `Question` model instances.
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Optional
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -43,37 +43,6 @@ class CRUDQuestion(CRUDBase[Question, QuestionCreate, QuestionUpdate]):
         db_session.refresh(question_obj)
 
         return question_obj
-
-    def update(
-        self,
-        db_session: Session,
-        *,
-        db_obj: Question,
-        obj_in: Union[QuestionUpdate, Dict[str, Any]]
-    ) -> Question:
-        """
-        Update question with fields and values specified by `obj_in`.
-        """
-
-        # Using db_obj.dict() method since jsonable_encoder() tries to encode raw image
-        # bytes as UTF-8, which would fail for obvious reasons.
-        obj_data = db_obj.dict()
-
-        if isinstance(obj_in, dict):
-            update_data = obj_in
-
-        else:
-            update_data = obj_in.dict(exclude_unset=True)
-
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
-
-        db_session.add(db_obj)
-        db_session.commit()
-        db_session.refresh(db_obj)
-
-        return db_obj
 
 
 question = CRUDQuestion(Question)

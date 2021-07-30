@@ -66,7 +66,10 @@ def test_update_question_order_item_question_id(db_session: Session) -> None:
     new_question_id = new_question.id
     question_order_item_in_update = QuestionOrderItemUpdate(question_id=new_question_id)
     crud.question_order_item.update(
-        db_session, db_obj=question_order_item, obj_in=question_order_item_in_update
+        db_session,
+        db_obj=question_order_item,
+        obj_in=question_order_item_in_update,
+        use_jsonable_encoder=False,
     )
 
     assert question_order_item.id
@@ -99,7 +102,10 @@ def test_update_question_order_item_question_number(db_session: Session) -> None
         question_number=new_question_number
     )
     crud.question_order_item.update(
-        db_session, db_obj=question_order_item, obj_in=question_order_item_in_update
+        db_session,
+        db_obj=question_order_item,
+        obj_in=question_order_item_in_update,
+        use_jsonable_encoder=False,
     )
 
     assert question_order_item.id

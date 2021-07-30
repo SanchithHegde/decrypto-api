@@ -50,7 +50,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db_session: Session,
         *,
         db_obj: User,
-        obj_in: Union[UserUpdate, Dict[str, Any]]
+        obj_in: Union[UserUpdate, Dict[str, Any]],
+        use_jsonable_encoder: bool = False
     ) -> User:
         """
         Update user `db_obj` by fields and values specified by `obj_in`.
@@ -70,7 +71,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if update_data.get("question_number"):
             update_data["question_number_updated_at"] = func.now()
 
-        user_obj = super().update(db_session, db_obj=db_obj, obj_in=update_data)
+        user_obj = super().update(
+            db_session,
+            db_obj=db_obj,
+            obj_in=update_data,
+            use_jsonable_encoder=use_jsonable_encoder,
+        )
 
         if update_data.get("question_number"):
             self.update_ranks(db_session)

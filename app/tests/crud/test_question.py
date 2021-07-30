@@ -54,7 +54,12 @@ def test_update_question(db_session: Session) -> None:
 
     new_answer = random_lower_string()
     question_in_update = QuestionUpdate(answer=new_answer)
-    crud.question.update(db_session, db_obj=question, obj_in=question_in_update)
+    crud.question.update(
+        db_session,
+        db_obj=question,
+        obj_in=question_in_update,
+        use_jsonable_encoder=False,
+    )
 
     assert question.id
     updated_question = crud.question.get(db_session, identifier=question.id)

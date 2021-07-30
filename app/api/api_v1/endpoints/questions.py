@@ -171,7 +171,9 @@ async def update_question(
             detail="The question with this answer already exists in the system",
         )
 
-    question = crud.question.update(db_session, db_obj=question, obj_in=question_in)
+    question = crud.question.update(
+        db_session, db_obj=question, obj_in=question_in, use_jsonable_encoder=False
+    )
 
     assert question.content is not None
 
