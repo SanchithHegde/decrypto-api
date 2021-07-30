@@ -35,6 +35,7 @@ class UserUpdate(UserBase):
     """
 
     password: Optional[str] = None
+    question_number: Optional[int] = None
 
 
 class UserInDBBase(UserBase):
@@ -44,6 +45,7 @@ class UserInDBBase(UserBase):
     """
 
     id: Optional[int] = None
+    question_number: Optional[int] = None
 
     class Config:  # pylint: disable=too-few-public-methods
         """
