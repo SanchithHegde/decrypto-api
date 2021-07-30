@@ -355,6 +355,7 @@ def test_verify_answer_correct_answer(client: TestClient, db_session: Session) -
     assert user.rank
     old_rank = user.rank
     updated_user = crud.user.get(db_session, identifier=user.id)
+    db_session.refresh(updated_user)
 
     assert updated_user
     assert updated_user.question_number
