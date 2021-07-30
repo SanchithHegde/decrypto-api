@@ -175,8 +175,8 @@ def test_retrieve_users(
     all_users = response.json()
 
     assert len(all_users) > 1
-    for item in all_users:
-        assert "email" in item
+    for user in all_users:
+        assert "email" in user
 
 
 def test_update_user_normal_user_me(
@@ -399,3 +399,18 @@ def test_verify_answer_incorrect_answer(
     assert question_number
     assert unmodified_user.question_number == question_number
     assert unmodified_user.rank == old_rank
+
+
+def test_retrieve_leaderboard(client: TestClient, db_session: Session) -> None:
+    create_random_user(db_session)
+    create_random_user(db_session)
+    create_random_user(db_session)
+
+    response = client.get(f"{settings.API_V1_STR}/users/leaderboard")
+    all_users = response.json()
+
+    assert len(all_users) > 1
+    for user in all_users:
+        assert "question_number" in user
+        assert "rank" in user
+        assert "full_name" in user

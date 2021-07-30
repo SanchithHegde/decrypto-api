@@ -17,4 +17,4 @@ from app.schemas.question_order_item import (
     QuestionOrderItemUpdate,
 )
 from app.schemas.token import Token, TokenPayload
-from app.schemas.user import User, UserCreate, UserUpdate
+from app.schemas.user import User, UserCreate, UserLeaderboard, UserUpdate

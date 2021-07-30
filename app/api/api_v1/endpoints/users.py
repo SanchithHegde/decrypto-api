@@ -217,6 +217,26 @@ def verify_user_answer(
 
 
 @router.get(
+    "/leaderboard",
+    response_model=List[schemas.UserLeaderboard],
+    summary="Obtain the leaderboard",
+)
+def read_leaderboard(
+    skip: int = 0,
+    limit: int = 100,
+    db_session: Session = Depends(dependencies.get_db_session),
+) -> Any:
+    """
+    Obtain the leaderboard starting at offset `skip` and containing a maximum of `limit`
+    number of instances.
+    """
+
+    leaderboard = crud.user.get_leaderboard(db_session, skip=skip, limit=limit)
+
+    return leaderboard
+
+
+@router.get(
     "/{user_id}",
     response_model=schemas.User,
     summary="Obtain a user's details given the user ID",

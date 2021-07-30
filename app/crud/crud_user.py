@@ -2,7 +2,7 @@
 CRUD operations on `User` model instances.
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session, aliased
@@ -147,6 +147,26 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             {User.rank: count_higher_ranks + 1}, synchronize_session=False
         )
         db_session.commit()
+
+    @staticmethod
+    def get_leaderboard(
+        db_session: Session, skip: int = 0, limit: int = 100
+    ) -> List[User]:
+        """
+        Returns a list of users in decreasing order of question numbers and increasing
+        order of question number update timestamp, starting at offset `skip` and
+        containing a maximum of `limit` number of elements.
+        """
+
+        return (
+            db_session.query(User)
+            .order_by(
+                User.question_number.desc(), User.question_number_updated_at.asc()
+            )
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
 
 user = CRUDUser(User)
