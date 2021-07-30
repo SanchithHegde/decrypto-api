@@ -13,8 +13,6 @@ class UserBase(BaseModel):
     Pydantic user schema containing common attributes of all schemas.
     """
 
-    email: Optional[EmailStr] = None
-    is_superuser: bool = False
     full_name: Optional[str] = None
 
 
@@ -27,6 +25,7 @@ class UserCreate(UserBase):
     email: EmailStr
     password: str
     full_name: str
+    is_superuser: bool = False
 
 
 class UserUpdate(UserBase):
@@ -35,8 +34,10 @@ class UserUpdate(UserBase):
     details.
     """
 
+    email: Optional[EmailStr] = None
     password: Optional[str] = None
     question_number: Optional[int] = None
+    is_superuser: bool = False
 
 
 class UserInDBBase(UserBase):
@@ -45,7 +46,6 @@ class UserInDBBase(UserBase):
     stored in the database.
     """
 
-    id: Optional[int] = None
     question_number: Optional[int] = None
     rank: Optional[int] = None
 
@@ -60,13 +60,24 @@ class UserInDBBase(UserBase):
         orm_mode = True
 
 
+class UserLeaderboard(UserInDBBase):
+    """
+    Pydantic user schema containing attributes returned via the API when the leaderboard
+    is accessed.
+    """
+
+
 class User(UserInDBBase):
     """
     Pydantic user schema containing attributes returned via the API.
     """
 
+    id: Optional[int] = None
+    email: Optional[EmailStr] = None
+    is_superuser: bool = False
 
-class UserInDB(UserInDBBase):
+
+class UserInDB(User):
     """
     Pydantic user schema containing attributes for a user stored in the database.
     """
