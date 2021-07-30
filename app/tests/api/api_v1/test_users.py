@@ -11,7 +11,7 @@ from app import crud
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserUpdate
 from app.tests.utils.question_order_item import create_random_question_order_item
-from app.tests.utils.user import create_random_user
+from app.tests.utils.user import authentication_token_from_email, create_random_user
 from app.tests.utils.utils import random_email, random_lower_string
 
 
@@ -307,15 +307,16 @@ def test_delete_user_not_existing_user(
     assert response.status_code == 404
 
 
-def test_get_question(
-    client: TestClient, normal_user_token_headers: Dict[str, str], db_session: Session
-) -> None:
+def test_get_question(client: TestClient, db_session: Session) -> None:
     question_order_item = create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
-    user = crud.user.get_by_email(db_session, email=settings.EMAIL_TEST_USER)
-    assert user  # Required for mypy
+    user = create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    assert user.email  # Required for mypy
+    normal_user_token_headers = authentication_token_from_email(
+        client=client, email=user.email, db_session=db_session
+    )
 
     response = client.get(
         f"{settings.API_V1_STR}/users/question", headers=normal_user_token_headers
