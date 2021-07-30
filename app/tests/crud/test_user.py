@@ -174,8 +174,10 @@ def test_user_higher_rank_on_question_number_increase(db_session: Session) -> No
     updated_user1_1 = crud.user.get(db_session, identifier=user1.id)
     assert updated_user1_1
     assert updated_user1_1.question_number
+    assert updated_user1_1.question_number_updated_at
     assert updated_user1_1.rank
     old_question_number = updated_user1_1.question_number
+    old_question_number_updated_at = updated_user1_1.question_number_updated_at
     old_rank = updated_user1_1.rank
 
     assert updated_user2
@@ -190,6 +192,10 @@ def test_user_higher_rank_on_question_number_increase(db_session: Session) -> No
     assert (
         updated_user1_2.question_number
         and updated_user1_2.question_number == old_question_number + 1
+    )
+    assert (
+        updated_user1_2.question_number_updated_at
+        and updated_user1_2.question_number_updated_at > old_question_number_updated_at
     )
     assert updated_user1_2.rank and updated_user1_2.rank < old_rank
 

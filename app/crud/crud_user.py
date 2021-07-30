@@ -67,6 +67,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
 
+        if update_data.get("question_number"):
+            update_data["question_number_updated_at"] = func.now()
+
         user_obj = super().update(db_session, db_obj=db_obj, obj_in=update_data)
 
         if update_data.get("question_number"):
