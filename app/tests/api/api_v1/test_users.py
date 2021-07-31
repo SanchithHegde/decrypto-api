@@ -10,9 +10,10 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserUpdate
+from app.tests.utils.question import png_content_type
 from app.tests.utils.question_order_item import create_random_question_order_item
 from app.tests.utils.user import authentication_token_from_email, create_random_user
-from app.tests.utils.utils import random_email, random_lower_string
+from app.tests.utils.utils import random_email, random_int, random_lower_string
 
 
 def test_get_users_superuser_me(
@@ -328,6 +329,75 @@ def test_get_question(client: TestClient, db_session: Session) -> None:
 
     assert "content" in question_data
     assert "content_type" in question_data
+
+
+def test_get_question_image(client: TestClient, db_session: Session) -> None:
+    question_order_item = create_random_question_order_item(db_session)
+    question_number = question_order_item.question_number
+    user = create_random_user(db_session)
+    user_in_update = UserUpdate(question_number=question_number)
+    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    assert user.email  # Required for mypy
+    normal_user_token_headers = authentication_token_from_email(
+        client=client, email=user.email, db_session=db_session
+    )
+    params = {"image": True}
+
+    response = client.get(
+        f"{settings.API_V1_STR}/users/question",
+        headers=normal_user_token_headers,
+        params=params,
+    )
+
+    assert 200 <= response.status_code < 300
+
+    content_type_header = "content-type"
+    assert content_type_header in response.headers
+    assert response.headers[content_type_header] == png_content_type()
+
+
+def test_get_question_redirect_if_none(client: TestClient, db_session: Session) -> None:
+    question_number = random_int()
+    user = create_random_user(db_session)
+    user_in_update = UserUpdate(question_number=question_number)
+    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    assert user.email  # Required for mypy
+    normal_user_token_headers = authentication_token_from_email(
+        client=client, email=user.email, db_session=db_session
+    )
+
+    response = client.get(
+        f"{settings.API_V1_STR}/users/question",
+        headers=normal_user_token_headers,
+        allow_redirects=False,
+    )
+
+    assert response.status_code == 307
+
+
+def test_get_question_redirect_if_none_allow_redirects(
+    client: TestClient, db_session: Session
+) -> None:
+    question_number = random_int()
+    user = create_random_user(db_session)
+    user_in_update = UserUpdate(question_number=question_number)
+    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    assert user.email  # Required for mypy
+    normal_user_token_headers = authentication_token_from_email(
+        client=client, email=user.email, db_session=db_session
+    )
+
+    response = client.get(
+        f"{settings.API_V1_STR}/users/question",
+        headers=normal_user_token_headers,
+        allow_redirects=True,
+    )
+
+    assert 200 <= response.status_code < 300
+
+    message_json = response.json()
+
+    assert "message" in message_json
 
 
 def test_verify_answer_correct_answer(client: TestClient, db_session: Session) -> None:
