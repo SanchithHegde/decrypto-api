@@ -7,6 +7,7 @@ from typing import Any, List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import RedirectResponse
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
@@ -160,7 +161,8 @@ def create_user_open(
     responses={
         200: {
             "content": {"image/jpeg": {}, "image/png": {}},
-        }
+        },
+        307: {"description": "User completed answering all questions"},
     },
     summary="Obtain the current question for the user",
 )
@@ -172,9 +174,14 @@ def read_user_question(
     Obtain the current question for the user.
 
     If `image` is `true`, returns the image with the appropriate `Content-Type` header.
+
+    Redirects with a `307` status code if the user completed answering all questions.
     """
 
     question = current_user.question
+
+    if question is None:
+        return RedirectResponse(f"{settings.API_V1_STR}{router.prefix}/game_over")
 
     if image:
         return Response(content=question.content, media_type=question.content_type)
@@ -234,6 +241,19 @@ def read_leaderboard(
     leaderboard = crud.user.get_leaderboard(db_session, skip=skip, limit=limit)
 
     return leaderboard
+
+
+@router.get(
+    "/game_over",
+    response_model=schemas.Message,
+    summary="User completed answering all questions",
+)
+def game_over(_: models.User = Depends(dependencies.get_current_user)) -> Any:
+    """
+    User completed answering all questions.
+    """
+
+    return {"message": "Congratulations, you have answered all questions!"}
 
 
 @router.get(
