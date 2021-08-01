@@ -20,7 +20,6 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
 
-    SERVER_NAME: str
     SERVER_HOST: AnyHttpUrl
 
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
@@ -50,7 +49,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
-    POSTGRES_TEST_DB: str
+    POSTGRES_TEST_DB: Optional[str] = None
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
@@ -103,16 +102,16 @@ class Settings(BaseSettings):
 
     @validator("EMAILS_FROM_NAME")
     def get_project_name(  # pylint: disable=no-self-argument,no-self-use
-        cls, project_name: Optional[str], values: Dict[str, Any]
+        cls, emails_from_name: Optional[str], values: Dict[str, Any]
     ) -> str:
         """
         Returns project name.
         """
 
-        if not project_name:
+        if not emails_from_name:
             return values["PROJECT_NAME"]
 
-        return project_name
+        return emails_from_name
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
     EMAIL_TEMPLATES_DIR: str = "app/email-templates/build"
