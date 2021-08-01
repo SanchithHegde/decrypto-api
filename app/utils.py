@@ -13,6 +13,7 @@ from jose import jwt  # type: ignore
 
 from app import LOGGER
 from app.core.config import settings
+from app.core.security import JWT_SIGNATURE_ALGORITHM
 
 
 def send_email(
@@ -168,7 +169,7 @@ def generate_password_reset_token(email: str) -> str:
     encoded_jwt = jwt.encode(
         {"exp": exp, "nbf": now, "sub": email},
         settings.SECRET_KEY,
-        algorithm="HS256",
+        algorithm=JWT_SIGNATURE_ALGORITHM,
     )
 
     return encoded_jwt
@@ -181,7 +182,9 @@ def verify_password_reset_token(token: str) -> Optional[str]:
     """
 
     try:
-        decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        decoded_token = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[JWT_SIGNATURE_ALGORITHM]
+        )
 
         return decoded_token["sub"]
 

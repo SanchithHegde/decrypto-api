@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Any, Optional, Union
 
 from jose import jwt  # type: ignore
+from jose.constants import ALGORITHMS  # type: ignore
 from passlib.context import CryptContext  # type: ignore
 
 from app.core.config import settings
@@ -13,7 +14,7 @@ from app.core.config import settings
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
-ALGORITHM = "HS256"
+JWT_SIGNATURE_ALGORITHM = ALGORITHMS.HS256
 
 
 def create_access_token(
@@ -33,7 +34,9 @@ def create_access_token(
         )
 
     to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=JWT_SIGNATURE_ALGORITHM
+    )
 
     return encoded_jwt
 
