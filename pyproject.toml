@@ -7,10 +7,11 @@ authors     = [ "Your Name <you@example.com>" ]
 [tool.poetry.dependencies]
 python           = "^3.9"
 alembic          = "^1.6.5"
+coloredlogs      = "^15.0.1"
 emails           = "^0.6"
 fastapi          = "^0.67.0"
 Jinja2           = "^3.0.1"
-passlib          = "^1.7.4"
+passlib          = { extras = [ "argon2" ], version = "^1.7.4" }
 psycopg2         = "^2.9.1"
 pydantic         = { extras = [ "dotenv", "email" ], version = "^1.8.2" }
 python-jose      = { extras = [ "cryptography" ], version = "^3.3.0" }
@@ -18,7 +19,6 @@ python-multipart = "^0.0.5"
 SQLAlchemy       = "^1.4.22"
 tenacity         = "^8.0.1"
 uvicorn          = { extras = [ "standard" ], version = "^0.14.0" }
-coloredlogs      = "^15.0.1"
 
 [tool.poetry.dev-dependencies]
 black             = { version = "^21.6b0", allow-prereleases = true }
@@ -36,6 +36,15 @@ build-backend = "poetry.core.masonry.api"
 
 # Configuration for other tools
 
+[tool.coverage.run]
+omit = [
+    "app/backend_pre_start.py",
+    "app/db/init_db.py",
+    "app/initial_data.py",
+    "app/tests_pre_start.py",
+    "app/tests/*",
+]
+
 [tool.isort]
 profile           = "black"
 known_first_party = [ "app" ]
@@ -52,12 +61,3 @@ disable = []
 
 [tool.pylint.reports]
 output-format = "colorized"
-
-[tool.coverage.run]
-omit = [
-    "app/backend_pre_start.py",
-    "app/db/init_db.py",
-    "app/initial_data.py",
-    "app/tests_pre_start.py",
-    "app/tests/*",
-]
