@@ -1,0 +1,199 @@
+= Decrypto API
+:toc: macro
+:toc-title!:
+
+The Decrypto API, implemented using https://github.com/tiangolo/fastapi[FastAPI].
+
+Based on the backend from https://github.com/tiangolo/full-stack-fastapi-postgresql[full-stack-fastapi-postgresql].
+
+[discrete]
+== Table of Contents
+
+toc::[]
+
+== Installation
+
+The following instructions are primarily aimed at Linux systems.
+You will have to make necessary changes to the commands to be able to run them on other operating systems.
+
+=== Dependencies
+
+* You will need to have Python, https://python-poetry.org/docs/[poetry] and https://www.postgresql.org/download/[PostgreSQL] installed before proceeding further.
+
+* Clone the repository and switch to the project directory.
++
+[source, shell]
+--
+$ git clone https://github.com/SanchithHegde/decrypto-api
+$ cd decrypto-api
+--
+
+* Install dependencies.
++
+[source, shell]
+--
+$ poetry install --no-dev --no-root
+--
+
+* Activate the environment.
++
+[source, shell]
+--
+$ poetry shell
+--
+
+=== Database Setup
+
+Create a database user and the database by connecting to the `psql` shell.
+
+[TIP]
+====
+It is recommended to use longer and more random database names, usernames and passwords for production.
+You can generate them using `openssl rand -hex 32`, replacing `32` with a larger number if longer strings are desired.
+====
+
+[source, sql]
+--
+CREATE ROLE db_user WITH NOSUPERUSER CREATEDB LOGIN PASSWORD 'db_password';
+CREATE DATABASE db_name;
+\q
+--
+
+== Configuration
+
+The application can be configured either using a `.env` file present at the root of the project directory, or using environment variables.
+If both the `.env` file is present and the corresponding environment variables are set, *environment variables will always take priority over values loaded from a `.env` file*.
+
+A sample `.env` file has been provided as `.env.sample`.
+Copy it as `.env` and make the necessary changes in the `.env` file.
+If you need to override more fields in the link:app/core/config.py[`app/core/config.py`] file, just add the corresponding field to the `.env` file and override the value.
+
+=== Emails - GMail SMTP Settings
+
+If you wish to use the GMail SMTP server for development and testing, a sample configuration for use with the GMail SMTP server is as follows:
+
+[source, shell]
+--
+SMTP_PORT="587"
+SMTP_HOST="smtp.gmail.com"
+SMTP_USER="user@gmail.com"
+SMTP_PASSWORD="my_password"
+EMAILS_FROM_EMAIL="user@gmail.com"
+--
+
+[NOTE]
+====
+* You'll need to enable "less secure app access" at https://myaccount.google.com/lesssecureapps[].
+For more information, refer to https://support.google.com/accounts/answer/6010255[this help article].
+
+* If your account has 2FA enabled, then you'll have to use an app password instead of your Google account password, in addition to enabling less secure app access.
+For more information, refer to https://support.google.com/accounts/answer/185833[this help article].
+====
+
+== Running the Application using Gunicorn
+
+You can use the link:scripts/start.sh[`start.sh`] script to run the application using Gunicorn.
+
+[source, shell]
+--
+$ scripts/start.sh
+--
+
+Visit `http://SERVER_IP_ADDRESS/docs` to view the interactive API documentation.
+
+== Running Tests
+
+* Create the test database.
++
+[source, sql]
+--
+CREATE DATABASE test_db_name;
+\q
+--
+
+* Update the configuration with the test database name.
+
+* Install development dependencies.
++
+[source, shell]
+--
+$ poetry install --no-root
+--
+
+* Run tests.
++
+[source, shell]
+--
+$ scripts/test.sh
+--
+
+== Development
+
+=== Installing Dependencies
+
+Install development dependencies.
+
+[source, shell]
+--
+$ poetry install --no-root
+--
+
+=== Running the Application using Uvicorn
+
+You can use the link:scripts/start-reload.sh[`start-reload.sh`] script to run the application using Uvicorn, which reloads the server whenever files in the `app` directory are modified.
+
+[source, shell]
+--
+$ scripts/start-reload.sh
+--
+
+=== Alembic Migrations
+
+If any of the models have changed, you can generate migrations for those changes using Alembic.
+
+[source, shell]
+--
+$ alembic revision --autogenerate -m "Add xyz attribute to User model"
+--
+
+Restart the server so that the migrations are applied.
+
+=== Email Templates
+
+Email templates are built using https://mjml.io/[MJML].
+Templates can be created or modified online at https://mjml.io/try-it-live[].
+
+If you want the modify the existing ones you can copy the contents of the template in the `src` directory into the browser, make the modifications then click "view HTML" on the top right to see the generated HTML.
+Save the generated HTML in the `build` directory with suitable filename.
+
+If you use VS Code, https://marketplace.visualstudio.com/items?itemName=attilabuti.vscode-mjml[this extension] simplifies the process.
+
+=== Formatting and Linting
+
+To ensure code quality and readability, we use the following tools for formatting code and catching common mistakes.
+We request you to use the same when making any contributions to this repository to help keep the code uniform.
+
+* https://github.com/psf/black[`black`]: Code formatter
+* https://github.com/myint/docformatter[`docformatter`]: Docstring formatter
+* https://github.com/PyCQA/isort[`isort`]: Sorting imports
+* https://github.com/python/mypy[`mypy`]: Static type checking
+* https://github.com/PyCQA/pylint[`pylint`]: Static code analysis
+
+If you use VS Code and have the https://marketplace.visualstudio.com/items?itemName=ms-python.python[Python extension] installed, all of the above tools (except `docformatter`) work right within the editor.
+VS Code will format files, sort imports and show lints when source files are saved.
+
+For running `docformatter`, run the following command.
+
+[source, shell]
+--
+$ docformatter --in-place --recursive --wrap-summaries 88 --wrap-descriptions 88 --pre-summary-newline --make-summary-multi-line app
+--
+
+=== Pre-Commit Hooks
+
+We also use https://github.com/pre-commit/pre-commit[`pre-commit`] to ensure that each commit passes all the formatting and linting checks.
+Refer to the https://pre-commit.com/#install[`pre-commit` docs] for installation and usage information.
+
+== License
+
+TBD
