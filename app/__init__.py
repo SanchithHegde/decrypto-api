@@ -16,5 +16,5 @@ coloredlogs.install(level=LOG_LEVEL, logger=LOGGER, fmt=LOG_FORMAT)
 # Set to INFO for logging queries,
 # DEBUG for logging query results in addition to queries
 coloredlogs.install(
-    level=logging.DEBUG, logger=logging.getLogger("sqlalchemy.engine"), fmt=LOG_FORMAT
+    level=logging.WARN, logger=logging.getLogger("sqlalchemy.engine"), fmt=LOG_FORMAT
 )
