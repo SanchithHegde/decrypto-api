@@ -5,7 +5,7 @@ CRUD operations on `User` model instances.
 from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import func
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
@@ -135,23 +135,35 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         Updates ranks of all users.
         """
 
-        # UPDATE user SET rank=(
-        #   SELECT count(*) FROM user AS user1
-        #   WHERE user1.question_number > user.question_number
-        # ) + 1
-        # Source: https://stackoverflow.com/a/21346088
+        # Using the `dense_rank()` window function
+        # Reference: https://www.postgresql.org/docs/current/tutorial-window.html
 
-        user1 = aliased(User)
+        # WITH id_ranks AS (
+        #   SELECT id, dense_rank() OVER (
+        #     ORDER BY question_number DESC, question_number_updated_at ASC
+        #   ) AS dense_rank
+        #   FROM decrypto_user
+        # )
+        # UPDATE decrypto_user
+        #   SET rank = id_ranks.dense_rank
+        #   FROM id_ranks
+        #   WHERE decrypto_user.id = id_ranks.id;
 
-        # "Higher ranks" considering rank 1 is higher than rank 2
-        count_higher_ranks = (
-            db_session.query(func.count(user1.id))
-            .filter(user1.question_number > User.question_number)
-            .scalar_subquery()
+        id_ranks = db_session.query(
+            User.id,
+            func.dense_rank()
+            .over(
+                order_by=[  # type: ignore
+                    User.question_number.desc(),
+                    User.question_number_updated_at.asc(),
+                ]
+            )
+            .label("dense_rank"),
+        ).cte(name="id_ranks")
+        db_session.query(User).filter(User.id == id_ranks.c.id).update(
+            {User.rank: id_ranks.c.dense_rank}, synchronize_session=False
         )
-        db_session.query(User).update(
-            {User.rank: count_higher_ranks + 1}, synchronize_session=False
-        )
+
         db_session.commit()
 
     @staticmethod

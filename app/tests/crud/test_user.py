@@ -220,7 +220,7 @@ def test_user_lower_rank_on_another_user_same_rank_question_number_increase(
     user2 = crud.user.create(db_session, obj_in=user_in2)
     assert user2.id
 
-    # Update user2 to have same question number and rank as user1
+    # Update user2 to have same question number as user1
     user2_in_update1 = UserUpdate(question_number=user1.question_number)
     crud.user.update(db_session, db_obj=user2, obj_in=user2_in_update1)
     updated_user2_1 = crud.user.get(db_session, identifier=user2.id)
@@ -229,7 +229,7 @@ def test_user_lower_rank_on_another_user_same_rank_question_number_increase(
     assert updated_user2_1.question_number
     assert updated_user2_1.question_number == user1.question_number
     assert updated_user2_1.rank
-    assert updated_user2_1.rank == user1_rank
+    assert updated_user2_1.rank > user1_rank
 
     # Increment user2's question number by 1
     new_question_number = updated_user2_1.question_number + 1
