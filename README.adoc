@@ -99,7 +99,7 @@ You can use the link:scripts/start.sh[`start.sh`] script to run the application 
 $ scripts/start.sh
 --
 
-Visit `http://SERVER_IP_ADDRESS/docs` to view the interactive API documentation.
+Visit `\http://SERVER_IP_ADDRESS/docs` to view the interactive API documentation.
 
 == Running Tests
 
