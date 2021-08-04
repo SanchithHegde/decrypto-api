@@ -132,7 +132,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     @staticmethod
     def update_ranks(db_session: Session) -> None:
         """
-        Updates ranks of all users.
+        Updates ranks of all non-superusers.
         """
 
         # Using the `dense_rank()` window function
@@ -143,26 +143,33 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         #     ORDER BY question_number DESC, question_number_updated_at ASC
         #   ) AS dense_rank
         #   FROM decrypto_user
+        #   WHERE is_superuser = 'false'
         # )
         # UPDATE decrypto_user
         #   SET rank = id_ranks.dense_rank
         #   FROM id_ranks
-        #   WHERE decrypto_user.id = id_ranks.id;
+        #   WHERE decrypto_user.is_superuser = 'false'
+        #     AND decrypto_user.id = id_ranks.id;
 
-        id_ranks = db_session.query(
-            User.id,
-            func.dense_rank()
-            .over(
-                order_by=[  # type: ignore
-                    User.question_number.desc(),
-                    User.question_number_updated_at.asc(),
-                ]
+        id_ranks = (
+            db_session.query(
+                User.id,
+                func.dense_rank()
+                .over(
+                    order_by=[  # type: ignore
+                        User.question_number.desc(),
+                        User.question_number_updated_at.asc(),
+                    ]
+                )
+                .label("dense_rank"),
             )
-            .label("dense_rank"),
-        ).cte(name="id_ranks")
-        db_session.query(User).filter(User.id == id_ranks.c.id).update(
-            {User.rank: id_ranks.c.dense_rank}, synchronize_session=False
+            .filter(User.is_superuser == False)  # pylint: disable=singleton-comparison
+            .cte(name="id_ranks")
         )
+        db_session.query(User).filter(
+            User.is_superuser == False,  # pylint: disable=singleton-comparison
+            User.id == id_ranks.c.id,
+        ).update({User.rank: id_ranks.c.dense_rank}, synchronize_session=False)
 
         db_session.commit()
 
@@ -178,6 +185,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         return (
             db_session.query(User)
+            .filter(User.is_superuser == False)  # pylint: disable=singleton-comparison
             .order_by(
                 User.question_number.desc(), User.question_number_updated_at.asc()
             )

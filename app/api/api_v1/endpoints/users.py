@@ -236,6 +236,8 @@ def read_leaderboard(
     """
     Obtain the leaderboard starting at offset `skip` and containing a maximum of `limit`
     number of instances.
+
+    **NOTE:** All superusers are excluded from the leaderboard.
     """
 
     leaderboard = crud.user.get_leaderboard(db_session, skip=skip, limit=limit)
