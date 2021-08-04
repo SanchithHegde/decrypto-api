@@ -8,7 +8,7 @@ from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import Mapped
 
-from app.core.config import settings
+from app.utils import project_name_lowercase_no_spaces
 
 
 @as_declarative()
@@ -26,7 +26,7 @@ class Base:
         Generate __tablename__ automatically.
         """
 
-        project_name = settings.PROJECT_NAME.strip().lower().replace(" ", "")
+        project_name = project_name_lowercase_no_spaces()
         class_name = cls.__name__.lower()
 
         return f"{project_name}_{class_name}"

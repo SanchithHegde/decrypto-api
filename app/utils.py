@@ -190,3 +190,11 @@ def verify_password_reset_token(token: str) -> Optional[str]:
 
     except jwt.JWTError:
         return None
+
+
+def project_name_lowercase_no_spaces() -> str:
+    """
+    Returns the lowercase project name without spaces.
+    """
+
+    return settings.PROJECT_NAME.strip().lower().replace(" ", "")

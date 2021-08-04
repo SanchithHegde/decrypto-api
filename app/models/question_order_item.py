@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, func
 from sqlalchemy.orm import Mapped, relationship
 
-from app.core.config import settings
 from app.db.base_class import Base
+from app.utils import project_name_lowercase_no_spaces
 
 if TYPE_CHECKING:
     from app.models import Question
@@ -24,7 +24,7 @@ class QuestionOrderItem(Base):  # pylint: disable=too-few-public-methods
     question_id = Column(
         Integer,
         ForeignKey(
-            f"{settings.PROJECT_NAME.strip().lower().replace(' ', '')}_question.id",
+            f"{project_name_lowercase_no_spaces()}_question.id",  # table_name.attribute
             ondelete="CASCADE",
         ),
         unique=True,
