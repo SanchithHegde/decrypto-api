@@ -21,9 +21,16 @@ def gif_content_type() -> str:
     return "image/gif"
 
 
+def horse_image_contents() -> bytes:
+    with open("app/tests/img/horse.png", "rb") as file:
+        contents = file.read()
+
+    return contents
+
+
 def create_random_question(db_session: Session) -> Question:
     answer = random_lower_string()
-    content = bytes(random_lower_string(), "UTF-8")
+    content = horse_image_contents()
     question_in = QuestionCreate(
         answer=answer,
         content=content,

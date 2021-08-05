@@ -1,4 +1,3 @@
-# pylint: disable=consider-using-with
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 
@@ -13,6 +12,7 @@ from app.schemas.question import QuestionCreate
 from app.tests.utils.question import (
     create_random_question,
     gif_content_type,
+    horse_image_contents,
     jpg_content_type,
     png_content_type,
 )
@@ -24,7 +24,7 @@ def test_create_question_accept_png(
 ) -> None:
     data = {"answer": random_lower_string()}
     files = {
-        "image": (random_lower_string(), random_lower_string(), png_content_type())
+        "image": (random_lower_string(), horse_image_contents(), png_content_type())
     }
     response = client.post(
         f"{settings.API_V1_STR}/questions/",
@@ -41,7 +41,7 @@ def test_create_question_accept_jpeg(
 ) -> None:
     data = {"answer": random_lower_string()}
     files = {
-        "image": (random_lower_string(), random_lower_string(), jpg_content_type())
+        "image": (random_lower_string(), horse_image_contents(), jpg_content_type())
     }
     response = client.post(
         f"{settings.API_V1_STR}/questions/",
@@ -58,7 +58,7 @@ def test_create_question_not_accept_gif(
 ) -> None:
     data = {"answer": random_lower_string()}
     files = {
-        "image": (random_lower_string(), random_lower_string(), gif_content_type())
+        "image": (random_lower_string(), horse_image_contents(), gif_content_type())
     }
     response = client.post(
         f"{settings.API_V1_STR}/questions/",
@@ -76,7 +76,7 @@ def test_create_question_new_answer(
     answer = random_lower_string()
     data = {"answer": answer}
     files = {
-        "image": (random_lower_string(), random_lower_string(), png_content_type())
+        "image": (random_lower_string(), horse_image_contents(), png_content_type())
     }
     response = client.post(
         f"{settings.API_V1_STR}/questions/",
@@ -102,13 +102,13 @@ def test_create_question_existing_answer(
     answer = random_lower_string()
     question_in = QuestionCreate(
         answer=answer,
-        content=random_lower_string(),
+        content=horse_image_contents(),
         content_type=png_content_type(),
     )
     crud.question.create(db_session, obj_in=question_in)
     data = {"answer": answer}
     files = {
-        "image": (random_lower_string(), random_lower_string(), png_content_type())
+        "image": (random_lower_string(), horse_image_contents(), png_content_type())
     }
     response = client.post(
         f"{settings.API_V1_STR}/questions/",

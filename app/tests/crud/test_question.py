@@ -5,13 +5,13 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.schemas.question import QuestionCreate, QuestionUpdate
-from app.tests.utils.question import png_content_type
+from app.tests.utils.question import horse_image_contents, png_content_type
 from app.tests.utils.utils import random_lower_string
 
 
 def test_create_question(db_session: Session) -> None:
     answer = random_lower_string()
-    content = bytes(random_lower_string(), "UTF-8")
+    content = horse_image_contents()
     question_in = QuestionCreate(
         answer=answer,
         content=content,
@@ -28,7 +28,7 @@ def test_get_question(db_session: Session) -> None:
     answer = random_lower_string()
     question_in = QuestionCreate(
         answer=answer,
-        content=random_lower_string(),
+        content=horse_image_contents(),
         content_type=png_content_type(),
     )
     question = crud.question.create(db_session, obj_in=question_in)
@@ -47,7 +47,7 @@ def test_update_question(db_session: Session) -> None:
     answer = random_lower_string()
     question_in = QuestionCreate(
         answer=answer,
-        content=random_lower_string(),
+        content=horse_image_contents(),
         content_type=png_content_type(),
     )
     question = crud.question.create(db_session, obj_in=question_in)
@@ -74,7 +74,7 @@ def test_delete_question(db_session: Session) -> None:
     answer = random_lower_string()
     question_in = QuestionCreate(
         answer=answer,
-        content=random_lower_string(),
+        content=horse_image_contents(),
         content_type=png_content_type(),
     )
     question = crud.question.create(db_session, obj_in=question_in)
