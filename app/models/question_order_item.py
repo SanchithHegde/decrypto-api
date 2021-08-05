@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, relationship
 from app.db.base_class import Base
 from app.utils import project_name_lowercase_no_spaces
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from app.models import Question
 
 
