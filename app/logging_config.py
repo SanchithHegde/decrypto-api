@@ -64,6 +64,10 @@ logging_dict_config = {
         "json_file": {
             "class": "logging.handlers.RotatingFileHandler",
             "filename": "logs/app.log",
+            "mode": "a",
+            "maxBytes": 256000,
+            "backupCount": 10,
+            "encoding": "UTF-8",
             "level": "DEBUG",
             "formatter": "json",
         },
