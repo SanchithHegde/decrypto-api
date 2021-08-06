@@ -3,6 +3,7 @@ The Decrypto API.
 """
 
 import structlog
+from structlog.stdlib import AsyncBoundLogger
 
 # Enable logging
-LOGGER = structlog.getLogger(__name__)
+LOGGER: AsyncBoundLogger = structlog.getLogger(__name__)
