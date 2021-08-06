@@ -2,9 +2,14 @@
 Script to add initial data to database.
 """
 
-from app import LOGGER
+import logging
+
 from app.db.init_db import init_db
 from app.db.session import SessionLocal
+from app.logging_config import logging_dict_config
+
+logging.config.dictConfig(logging_dict_config)
+LOGGER = logging.getLogger("initial_data")
 
 
 def init() -> None:

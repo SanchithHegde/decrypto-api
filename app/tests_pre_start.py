@@ -6,12 +6,15 @@ import logging
 
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 
-from app import LOGGER
+from app.logging_config import logging_dict_config
 from app.tests.conftest import TestingSessionLocal
 
 # Wait for 5 minutes, stopping for 1 second after an unsuccessful try
 MAX_TRIES = 60 * 5
 WAIT_SECONDS = 1
+
+logging.config.dictConfig(logging_dict_config)
+LOGGER = logging.getLogger("tests_pre_start")
 
 
 @retry(
@@ -30,6 +33,7 @@ def verify_db_connectivity() -> None:
         # available
         db_session = TestingSessionLocal()
         db_session.execute("SELECT 1;")  # type: ignore
+        LOGGER.info("Database connection successful")
 
     except Exception as exception:
         LOGGER.exception(exception)

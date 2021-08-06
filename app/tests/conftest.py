@@ -2,6 +2,7 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=redefined-outer-name
 
+import logging
 from typing import Dict, Generator
 
 import pytest
@@ -9,14 +10,17 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import LOGGER
 from app.api.dependencies import get_db_session
 from app.core.config import settings
 from app.db.base_class import Base
 from app.db.init_db import init_db
+from app.logging_config import logging_dict_config
 from app.main import app
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
+
+logging.config.dictConfig(logging_dict_config)
+LOGGER = logging.getLogger(__name__)
 
 # Use separate database for testing
 assert settings.SQLALCHEMY_TEST_DATABASE_URI
