@@ -2,6 +2,8 @@ import json
 import multiprocessing
 import os
 
+from app.logging_config import logging_dict_config
+
 workers_per_core_str = os.getenv("WORKERS_PER_CORE", "1")
 max_workers_str = os.getenv("MAX_WORKERS")
 use_max_workers = None
@@ -47,6 +49,7 @@ keepalive_str = os.getenv("KEEP_ALIVE", "5")
 
 # Gunicorn config variables
 loglevel = use_loglevel
+logconfig_dict = logging_dict_config
 workers = web_concurrency
 bind = use_bind
 errorlog = use_errorlog
@@ -60,6 +63,7 @@ keepalive = int(keepalive_str)
 # For debugging and testing
 log_data = {
     "loglevel": loglevel,
+    "logconfig_dict": str(logging_dict_config),
     "workers": workers,
     "bind": bind,
     "graceful_timeout": graceful_timeout,

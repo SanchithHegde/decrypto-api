@@ -81,19 +81,28 @@ logging_dict_config = {
     "loggers": {
         "": {
             "handlers": ["default", "json_file"],
-            "level": "DEBUG",
-            # "propagate": False,
+            "level": "INFO",
+            "propagate": False,
+        },
+        "sqlalchemy.engine": {
+            # INFO for logging queries
+            # DEBUG for logging query results in addition to queries
+            "level": "WARNING",
         },
         "uvicorn.error": {
             "handlers": ["default", "json_file"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": False,
         },
         "uvicorn.access": {
             "handlers": ["default", "json_file"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": False,
         },
+    },
+    "root": {  # Required for Gunicorn
+        "handlers": ["default", "json_file"],
+        "level": "INFO",
     },
 }
 
