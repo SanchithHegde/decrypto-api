@@ -60,7 +60,7 @@ logging_dict_config = {
             "class": "logging.handlers.RotatingFileHandler",
             "filename": "logs/app.log",
             "mode": "a",
-            "maxBytes": 256000,
+            "maxBytes": 256 * 1024,  # 256 KiB
             "backupCount": 10,
             "encoding": "UTF-8",
             "level": "DEBUG",
@@ -113,6 +113,7 @@ def setup_logging() -> None:
 
     structlog.configure(
         processors=[
+            structlog.contextvars.merge_contextvars,
             structlog.stdlib.filter_by_level,
             *shared_processors,
             structlog.stdlib.PositionalArgumentsFormatter(),
