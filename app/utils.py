@@ -1,5 +1,5 @@
 """
-Utility functions to send emails and handling password reset.
+Utility functions to send emails and handle password reset.
 """
 
 from datetime import datetime, timedelta
@@ -16,7 +16,7 @@ from app.core.config import settings
 from app.core.security import JWT_SIGNATURE_ALGORITHM
 
 
-def send_email(
+async def send_email(
     email_to: str,
     subject_template: str = "",
     html_template: str = "",
@@ -64,14 +64,17 @@ def send_email(
 
     try:
         response = message.send(to=email_to, render=environment, smtp=smtp_options)
-        LOGGER.info("Email sent to %s. Response: %s", email_to, response)
+        await LOGGER.info("Email sent", email=email_to, response=response)
 
     except SMTPConnectNetworkError as error:
-        LOGGER.exception("Failed to send an email to %s: %s", email_to, error)
+        await LOGGER.exception(
+            "Failed to send an email", email=email_to, exc_info=error
+        )
+
         raise
 
 
-def send_test_email(email_to: str) -> None:
+async def send_test_email(email_to: str) -> None:
     """
     Send a test email to the provided email address.
     """
@@ -82,15 +85,17 @@ def send_test_email(email_to: str) -> None:
     with open(Path(settings.EMAIL_TEMPLATES_DIR) / "test_email.html") as file:
         template_str = file.read()
 
+    await LOGGER.info("Sending test email", email=email_to)
     send_email(
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,
         environment={"project_name": settings.PROJECT_NAME, "email": email_to},
     )
+    await LOGGER.info("Test email sent", email=email_to)
 
 
-def send_reset_password_email(email_to: str, email: str, token: str) -> None:
+async def send_reset_password_email(email_to: str, email: str, token: str) -> None:
     """
     Send a reset password email to the provided email address.
 
@@ -109,6 +114,7 @@ def send_reset_password_email(email_to: str, email: str, token: str) -> None:
 
     server_host = settings.SERVER_HOST
     link = f"{server_host}/reset-password?token={token}"
+    await LOGGER.info("Sending password recovery email", email=email_to)
     send_email(
         email_to=email_to,
         subject_template=subject,
@@ -121,9 +127,10 @@ def send_reset_password_email(email_to: str, email: str, token: str) -> None:
             "link": link,
         },
     )
+    await LOGGER.info("Password recovery email sent", email=email_to)
 
 
-def send_new_account_email(email_to: str, username: str, password: str) -> None:
+async def send_new_account_email(email_to: str, username: str, password: str) -> None:
     """
     Send a confirmation email about a user's account creation to the provided email
     address.
@@ -143,6 +150,7 @@ def send_new_account_email(email_to: str, username: str, password: str) -> None:
         template_str = file.read()
 
     link = settings.SERVER_HOST
+    await LOGGER.info("Sending account creation email", email=email_to)
     send_email(
         email_to=email_to,
         subject_template=subject,
@@ -155,9 +163,10 @@ def send_new_account_email(email_to: str, username: str, password: str) -> None:
             "link": link,
         },
     )
+    await LOGGER.info("Account creation email sent", email=email_to)
 
 
-def generate_password_reset_token(email: str) -> str:
+async def generate_password_reset_token(email: str) -> str:
     """
     Generate a password reset token for the provided email address.
     """
@@ -171,11 +180,12 @@ def generate_password_reset_token(email: str) -> str:
         settings.SECRET_KEY,
         algorithm=JWT_SIGNATURE_ALGORITHM,
     )
+    await LOGGER.info("Password reset token generated", email=email)
 
     return encoded_jwt
 
 
-def verify_password_reset_token(token: str) -> Optional[str]:
+async def verify_password_reset_token(token: str) -> Optional[str]:
     """
     Verifies the password reset token and returns the email address of the user if
     successful, `None` if unsuccessful.
@@ -185,8 +195,10 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         decoded_token = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[JWT_SIGNATURE_ALGORITHM]
         )
+        email = decoded_token["sub"]
+        await LOGGER.info("Password reset token verified", email=email)
 
-        return decoded_token["sub"]
+        return email
 
     except jwt.JWTError:
         return None

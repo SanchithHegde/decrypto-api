@@ -16,7 +16,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
+from app import LOGGER, crud, models, schemas
 from app.api import dependencies
 
 router = APIRouter(prefix="/questions", tags=["questions"])
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/questions", tags=["questions"])
     response_model=List[schemas.QuestionListItem],
     summary="Obtain a list of questions",
 )
-def read_questions(
+async def read_questions(
     skip: int = 0,
     limit: int = 100,
     db_session: Session = Depends(dependencies.get_db_session),
@@ -40,6 +40,7 @@ def read_questions(
     **Needs superuser privileges.**
     """
 
+    await LOGGER.info("Superuser listed questions", skip=skip, limit=limit)
     questions = crud.question.get_multi(db_session, skip=skip, limit=limit)
 
     return questions
@@ -66,6 +67,8 @@ async def create_question(
     question = crud.question.get_by_answer(db_session, answer=answer)
 
     if question:
+        await LOGGER.error("Question with answer already exists", answer=answer)
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The question with this answer already exists in the system",
@@ -78,11 +81,7 @@ async def create_question(
     }
     question_in = schemas.QuestionCreate(**question_data)
     question = crud.question.create(db_session, obj_in=question_in)
-
-    assert question.content is not None
-
-    # Base64 encode image and return response as JSON
-    question.content = base64.b64encode(question.content)
+    await LOGGER.info("Superuser created new question", question=question)
 
     return question
 
@@ -97,7 +96,7 @@ async def create_question(
     },
     summary="Obtain a questions's details given the question ID",
 )
-def read_question_by_id(
+async def read_question_by_id(
     question_id: int,
     image: Optional[bool] = None,
     db_session: Session = Depends(dependencies.get_db_session),
@@ -114,6 +113,8 @@ def read_question_by_id(
     question = crud.question.get(db_session, identifier=question_id)
 
     if not question:
+        await LOGGER.error("Question does not exist", question_id=question_id)
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="The question with this question ID does not exist in the system",
@@ -127,6 +128,8 @@ def read_question_by_id(
 
     # Base64 encode image and return response as JSON
     question.content = base64.b64encode(question.content)
+
+    await LOGGER.info("Superuser accessed question by ID", question=question)
 
     return question
 
@@ -155,6 +158,8 @@ async def update_question(
     question = crud.question.get(db_session, identifier=question_id)
 
     if not question:
+        await LOGGER.error("Question does not exist", question_id=question_id)
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="The question with this question ID does not exist in the system",
@@ -166,19 +171,24 @@ async def update_question(
     )
 
     if duplicate_answer:
+        await LOGGER.error(
+            "Question with answer already exists", answer=question_in.answer
+        )
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The question with this answer already exists in the system",
         )
 
+    await LOGGER.info(
+        "Superuser initiated answer update",
+        question=question,
+        answer=question_in.answer,
+    )
     question = crud.question.update(
         db_session, db_obj=question, obj_in=question_in, use_jsonable_encoder=False
     )
-
-    assert question.content is not None
-
-    # Base64 encode image and return response as JSON
-    question.content = base64.b64encode(question.content)
+    await LOGGER.info("Superuser updated question's answer by ID", question=question)
 
     return question
 
@@ -188,7 +198,7 @@ async def update_question(
     response_model=schemas.Message,
     summary="Delete a questions given the question ID",
 )
-def delete_question(
+async def delete_question(
     question_id: int,
     db_session: Session = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
@@ -202,11 +212,15 @@ def delete_question(
     question = crud.question.get(db_session, identifier=question_id)
 
     if not question:
+        await LOGGER.error("Question does not exist", question_id=question_id)
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="The question with this question ID does not exist in the system",
         )
 
+    await LOGGER.info("Superuser initiated question deletion", question=question)
     crud.question.remove(db_session, identifier=question_id)
+    await LOGGER.info("Superuser deleted question by ID", question=question)
 
     return {"message": "Question deleted successfully"}

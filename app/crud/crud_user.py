@@ -40,6 +40,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         db_session.add(user_obj)
         db_session.commit()
+
+        # Update the rank for the newly added user
         self.update_ranks(db_session)
         db_session.refresh(user_obj)
 
@@ -63,11 +65,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         else:
             update_data = obj_in.dict(exclude_unset=True)
 
+        # If password is to be updated, calculate password hash and add it to
+        # `update_data`, while deleting password from `update_data`
         if update_data.get("password"):
             hashed_password = get_password_hash(update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
 
+        # If question number is to be updated, also update `question_number_updated_at`
         if update_data.get("question_number"):
             update_data["question_number_updated_at"] = func.now()
 
@@ -78,6 +83,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             use_jsonable_encoder=use_jsonable_encoder,
         )
 
+        # If question number was updated, update the ranks after the user object was
+        # updated.
         if update_data.get("question_number"):
             self.update_ranks(db_session)
             db_session.refresh(user_obj)
@@ -91,6 +98,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         user_obj = super().remove(db_session, identifier=identifier)
 
+        # Update the ranks for the remaining users
         self.update_ranks(db_session)
 
         return user_obj

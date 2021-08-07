@@ -7,7 +7,7 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
+from app import LOGGER, crud, models, schemas
 from app.api import dependencies
 
 router = APIRouter(prefix="/questions_order", tags=["questions_order"])
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/questions_order", tags=["questions_order"])
     response_model=List[schemas.QuestionOrderItem],
     summary="Obtain a list of question numbers and their corresponding questions.",
 )
-def read_question_order_items(
+async def read_question_order_items(
     skip: int = 0,
     limit: int = 100,
     db_session: Session = Depends(dependencies.get_db_session),
@@ -31,6 +31,7 @@ def read_question_order_items(
     **Needs superuser privileges.**
     """
 
+    await LOGGER.info("Superuser listed question order items", skip=skip, limit=limit)
     question_order_items = crud.question_order_item.get_multi(
         db_session, skip=skip, limit=limit
     )
@@ -43,7 +44,7 @@ def read_question_order_items(
     response_model=schemas.QuestionOrderItem,
     summary="Associate a question with a question number",
 )
-def create_question_order_item(
+async def create_question_order_item(
     *,
     question_order_item_in: schemas.QuestionOrderItemCreate,
     db_session: Session = Depends(dependencies.get_db_session),
@@ -60,6 +61,10 @@ def create_question_order_item(
     )
 
     if not question:
+        await LOGGER.error(
+            "Question does not exist", question_id=question_order_item_in.question_id
+        )
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="The question with this question ID does not exist in the system",
@@ -74,6 +79,11 @@ def create_question_order_item(
     )
 
     if question_order_item:
+        await LOGGER.error(
+            "Question order item with question number already exists",
+            question_number=question_order_item_in.question_number,
+        )
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Another question is already associated with the question number",
@@ -85,6 +95,11 @@ def create_question_order_item(
     )
 
     if question_order_item:
+        await LOGGER.error(
+            "Question order item with question ID already exists",
+            question_id=question_order_item_in.question_id,
+        )
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This question is already associated with a question number",
@@ -92,6 +107,10 @@ def create_question_order_item(
 
     question_order_item = crud.question_order_item.create(
         db_session, obj_in=question_order_item_in
+    )
+    await LOGGER.info(
+        "Superuser created new question order item",
+        question_order_item=question_order_item,
     )
 
     return question_order_item
@@ -105,7 +124,7 @@ def create_question_order_item(
         "given the ID of their association"
     ),
 )
-def read_question_order_item_by_id(
+async def read_question_order_item_by_id(
     question_order_item_id: int,
     db_session: Session = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
@@ -122,6 +141,11 @@ def read_question_order_item_by_id(
     )
 
     if not question_order_item:
+        await LOGGER.error(
+            "Question order item does not exist",
+            question_order_item_id=question_order_item_id,
+        )
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=(
@@ -129,6 +153,11 @@ def read_question_order_item_by_id(
                 "does not exist in the system"
             ),
         )
+
+    await LOGGER.info(
+        "Superuser accessed question order item by ID",
+        question_order_item=question_order_item,
+    )
 
     return question_order_item
 
@@ -160,6 +189,11 @@ async def update_question_order_item(
     )
 
     if not question_order_item:
+        await LOGGER.error(
+            "Question order item does not exist",
+            question_order_item_id=question_order_item_id,
+        )
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=(
@@ -174,6 +208,11 @@ async def update_question_order_item(
         )
 
         if not question:
+            await LOGGER.error(
+                "Question does not exist",
+                question_id=question_order_item_in.question_id,
+            )
+
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="The question with this question ID does not exist in the system",
@@ -185,6 +224,11 @@ async def update_question_order_item(
         )
 
         if duplicate_question and duplicate_question != question_order_item:
+            await LOGGER.error(
+                "Question order item with question ID already exists",
+                question_id=question_order_item_in.question_id,
+            )
+
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This question is already associated with a question number",
@@ -200,16 +244,30 @@ async def update_question_order_item(
             duplicate_question_number
             and duplicate_question_number != question_order_item
         ):
+            await LOGGER.error(
+                "Question order item with question number already exists",
+                question_number=question_order_item_in.question_number,
+            )
+
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Another question is already associated with the question number",
             )
 
+    await LOGGER.info(
+        "Superuser initiated question order item update",
+        question_order_item=question_order_item,
+        **question_order_item_in.dict(),
+    )
     question_order_item = crud.question_order_item.update(
         db_session,
         db_obj=question_order_item,
         obj_in=question_order_item_in,
         use_jsonable_encoder=False,
+    )
+    await LOGGER.info(
+        "Superuser updated question order item details by ID",
+        question_order_item=question_order_item,
     )
 
     return question_order_item
@@ -223,7 +281,7 @@ async def update_question_order_item(
         "given the ID"
     ),
 )
-def delete_question_order_item(
+async def delete_question_order_item(
     question_order_item_id: int,
     db_session: Session = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
@@ -240,6 +298,11 @@ def delete_question_order_item(
     )
 
     if not question_order_item:
+        await LOGGER.error(
+            "Question order item does not exist",
+            question_order_item_id=question_order_item_id,
+        )
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=(
@@ -248,7 +311,15 @@ def delete_question_order_item(
             ),
         )
 
+    await LOGGER.info(
+        "Superuser initiated question order item deletion",
+        question_order_item=question_order_item,
+    )
     crud.question_order_item.remove(db_session, identifier=question_order_item_id)
+    await LOGGER.info(
+        "Superuser deleted question order item by ID",
+        question_order_item=question_order_item,
+    )
 
     return {
         "message": (

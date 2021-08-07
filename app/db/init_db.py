@@ -4,7 +4,7 @@ Creates initial data (first superuser) in the database.
 
 from sqlalchemy.orm import Session
 
-from app import crud, schemas
+from app import LOGGER, crud, schemas
 from app.core.config import settings
 from app.db import base  # pylint: disable=unused-import
 
@@ -33,3 +33,6 @@ def init_db(db_session: Session) -> None:
             is_superuser=True,
         )
         user = crud.user.create(db_session, obj_in=user_in)
+        LOGGER.info(
+            "Added first superuser to the database", email=settings.FIRST_SUPERUSER
+        )
