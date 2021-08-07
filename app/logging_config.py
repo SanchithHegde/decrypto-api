@@ -9,7 +9,6 @@ from typing import List
 import structlog
 import uvicorn  # type: ignore
 from starlette_context import context
-from starlette_context.errors import ContextDoesNotExistError
 from structlog.types import EventDict, WrappedLogger
 
 
@@ -20,12 +19,8 @@ def add_request_id(
     Custom `structlog` processor to add request ID to `event_dict` if available.
     """
 
-    try:
+    if context.exists():
         event_dict["request_id"] = context["X-Request-ID"]
-
-    except ContextDoesNotExistError:
-        # Outside a request-response cycle, request ID will be unavailable
-        pass
 
     return event_dict
 
