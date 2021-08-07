@@ -45,3 +45,13 @@ class QuestionOrderItem(Base):  # pylint: disable=too-few-public-methods
     question: Mapped["Question"] = relationship(
         "Question", uselist=False, viewonly=True
     )
+
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__} ("
+            f"id: {self.id}, "
+            f"question_number: {self.question_number}, "
+            f"question_id: {self.question_id}, "
+            f"question: {repr(self.question)}"
+            f")>"
+        )

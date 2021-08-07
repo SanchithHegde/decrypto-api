@@ -49,6 +49,19 @@ class User(Base):  # pylint: disable=too-few-public-methods
         viewonly=True,
     )
 
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__} ("
+            f"id: {self.id}, "
+            f"full_name: {self.full_name}, "
+            f"email: {self.email}, "
+            f"is_superuser: {self.is_superuser}, "
+            f"question_number: {self.question_number}, "
+            f"rank: {self.rank}, "
+            f"question: {repr(self.question)}"
+            f")>"
+        )
+
     # We are NOT setting a FOREIGN KEY constraint referencing
     # `QuestionOrderItem.question_number` as it causes inconsistencies in the situations
     # outlined below:

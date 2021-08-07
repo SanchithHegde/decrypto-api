@@ -19,3 +19,6 @@ class Question(Base):  # pylint: disable=too-few-public-methods
     updated_at = Column(
         DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
     )
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__} (id: {self.id}, answer: '{self.answer}')>"
