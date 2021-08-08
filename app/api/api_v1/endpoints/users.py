@@ -387,7 +387,9 @@ async def update_user(
         deep=True,
     )
     await LOGGER.info(
-        "Superuser initiated user details update", user=user, **user_in_temp.dict()
+        "Superuser initiated user details update",
+        user=user,
+        updated_details=user_in_temp,
     )
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in)
     await LOGGER.info("Superuser updated user's details by ID", user=user)

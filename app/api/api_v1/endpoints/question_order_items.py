@@ -257,7 +257,7 @@ async def update_question_order_item(
     await LOGGER.info(
         "Superuser initiated question order item update",
         question_order_item=question_order_item,
-        **question_order_item_in.dict(),
+        updated_details=question_order_item_in,
     )
     question_order_item = crud.question_order_item.update(
         db_session,
