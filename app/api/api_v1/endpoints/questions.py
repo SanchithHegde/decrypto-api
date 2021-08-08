@@ -122,14 +122,14 @@ async def read_question_by_id(
 
     assert question.content is not None
 
+    await LOGGER.info("Superuser accessed question by ID", question=question)
+
     # Return image directly with appropriate `Content-Type` header
     if image:
         return Response(content=question.content, media_type=question.content_type)
 
     # Base64 encode image and return response as JSON
     question.content = base64.b64encode(question.content)
-
-    await LOGGER.info("Superuser accessed question by ID", question=question)
 
     return question
 
