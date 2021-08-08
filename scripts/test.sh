@@ -3,6 +3,8 @@
 set -euxo pipefail
 
 export PYTHONPATH="."
+export SQLALCHEMY_WARN_20=true  # SQLAlchemy 2.0
+export PYTHONWARNINGS=error::DeprecationWarning  # SQLAlchemy 2.0
 
 if [ $(uname -s) = "Linux" ]; then
   echo "Removing __pycache__ files"
