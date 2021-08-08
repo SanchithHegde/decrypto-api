@@ -223,6 +223,7 @@ async def read_user_question(
 @router.post(
     "/answer",
     response_model=schemas.Message,
+    responses={303: {"description": "User completed answering all questions"}},
     summary="Verify the answer provided by the user for the current question",
 )
 async def verify_user_answer(
@@ -232,10 +233,23 @@ async def verify_user_answer(
 ) -> Any:
     """
     Verify the answer provided by the user for the current question.
+
+    Redirects with a `303` status code if the user completed answering all questions.
     """
 
     question = current_user.question
     answer = answer_in.answer
+
+    if question is None:
+        await LOGGER.info("Question not found, redirecting to 'game_over'")
+
+        # We use 303 status code since we want the client to send a GET request to the
+        # redirected endpoint, not POST.
+        # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/303
+        return RedirectResponse(
+            f"{settings.API_V1_STR}{router.prefix}/game_over",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
     if answer != question.answer:
         await LOGGER.info("User provided incorrect answer", answer=answer)
