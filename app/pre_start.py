@@ -14,7 +14,7 @@ MAX_TRIES = 60 * 5
 WAIT_SECONDS = 1
 
 logging.config.dictConfig(logging_dict_config)
-LOGGER = logging.getLogger("backend_pre_start")
+LOGGER = logging.getLogger("pre_start")
 
 
 @retry(

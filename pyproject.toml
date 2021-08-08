@@ -41,9 +41,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
 omit = [
-    "app/backend_pre_start.py",
     "app/db/init_db.py",
     "app/initial_data.py",
+    "app/pre_start.py",
     "app/tests_pre_start.py",
     "app/tests/*",
 ]
