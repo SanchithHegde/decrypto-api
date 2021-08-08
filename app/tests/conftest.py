@@ -25,8 +25,10 @@ LOGGER = logging.getLogger(__name__)
 # Use separate database for testing
 assert settings.SQLALCHEMY_TEST_DATABASE_URI
 
-engine = create_engine(settings.SQLALCHEMY_TEST_DATABASE_URI, pool_pre_ping=True)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(
+    settings.SQLALCHEMY_TEST_DATABASE_URI, pool_pre_ping=True, future=True
+)
+TestingSessionLocal = sessionmaker(autoflush=False, bind=engine, future=True)
 
 
 def override_get_db_session() -> Generator:
