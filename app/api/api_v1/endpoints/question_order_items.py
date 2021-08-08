@@ -202,7 +202,7 @@ async def update_question_order_item(
             ),
         )
 
-    if question_order_item_in.question_id:
+    if question_order_item_in.question_id is not None:
         question = crud.question.get(
             db_session, identifier=question_order_item_in.question_id
         )
@@ -234,7 +234,7 @@ async def update_question_order_item(
                 detail="This question is already associated with a question number",
             )
 
-    if question_order_item_in.question_number:
+    if question_order_item_in.question_number is not None:
         # Question number should be unique
         duplicate_question_number = crud.question_order_item.get_by_question_number(
             db_session, question_number=question_order_item_in.question_number
