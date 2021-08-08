@@ -4,6 +4,7 @@ Pre-start script to verify database connectivity.
 
 import logging
 
+from sqlalchemy import text
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 
 from app.db.session import SessionLocal
@@ -32,7 +33,7 @@ def verify_db_connectivity() -> None:
         # Try to create a session and execute a statement to check if database is
         # available
         db_session = SessionLocal()
-        db_session.execute("SELECT 1;")  # type: ignore
+        db_session.execute(text("SELECT 1;"))
         LOGGER.info("Database connection successful")
 
     except Exception as exception:
