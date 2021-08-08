@@ -5,8 +5,7 @@ Base class for all SQLAlchemy model definitions.
 from typing import Any, Dict
 
 from sqlalchemy import inspect
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, as_declarative, declared_attr
 
 from app.utils import project_name_lowercase_no_spaces
 
