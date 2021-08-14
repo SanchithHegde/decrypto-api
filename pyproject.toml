@@ -7,6 +7,7 @@ authors     = [ "Your Name <you@example.com>" ]
 [tool.poetry.dependencies]
 python            = "^3.9"
 alembic           = "^1.6.5"
+asyncpg           = "^0.24.0"
 colorama          = "^0.4.4"
 emails            = "^0.6"
 fastapi           = "^0.68.0"
@@ -17,7 +18,7 @@ psycopg2          = "^2.9.1"
 pydantic          = { extras = [ "dotenv", "email" ], version = "^1.8.2" }
 python-jose       = { extras = [ "cryptography" ], version = "^3.3.0" }
 python-multipart  = "^0.0.5"
-SQLAlchemy        = "^1.4.22"
+SQLAlchemy        = { extras = [ "asyncio" ], version = "^1.4.22" }
 starlette-context = "^0.3.3"
 structlog         = "^21.1.0"
 tenacity          = "^8.0.1"
