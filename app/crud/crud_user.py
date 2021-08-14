@@ -5,6 +5,8 @@ CRUD operations on `User` model instances.
 from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
@@ -19,12 +21,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     """
 
     @staticmethod
-    def get_by_email(db_session: Session, *, email: str) -> Optional[User]:
+    async def get_by_email(db_session: AsyncSession, *, email: str) -> Optional[User]:
         """
         Obtain user by email address.
         """
 
-        return db_session.query(User).filter(User.email == email).first()
+        statement = select(User).where(User.email == email)
+        return (await db_session.execute(statement)).scalar_one_or_none()
 
     def create(self, db_session: Session, *, obj_in: UserCreate) -> User:
         """
