@@ -6,7 +6,8 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base_class import Base
 
@@ -32,26 +33,31 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         self.model = model
 
-    def get(self, db_session: Session, identifier: int) -> Optional[ModelType]:
+    async def get(
+        self, db_session: AsyncSession, identifier: int
+    ) -> Optional[ModelType]:
         """
         Obtain model instance by `identifier`.
 
         Returns `None` on unsuccessful search.
         """
 
-        return db_session.get(self.model, identifier)
+        return await db_session.get(self.model, identifier)
 
-    def get_multi(
-        self, db_session: Session, *, skip: int = 0, limit: int = 100
+    async def get_multi(
+        self, db_session: AsyncSession, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
         """
         Obtain a list of model instances starting at offset `skip` and containing a
         maximum of `limit` number of elements.
         """
 
-        return db_session.query(self.model).offset(skip).limit(limit).all()
+        statement = select(self.model).offset(skip).limit(limit)
+        return (await db_session.execute(statement)).scalars().all()
 
-    def create(self, db_session: Session, *, obj_in: CreateSchemaType) -> ModelType:
+    async def create(
+        self, db_session: AsyncSession, *, obj_in: CreateSchemaType
+    ) -> ModelType:
         """
         Create an instance of the model and insert it into the database.
         """
@@ -60,14 +66,14 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_obj = self.model(**obj_in_data)  # type: ignore
 
         db_session.add(db_obj)
-        db_session.commit()
-        db_session.refresh(db_obj)
+        await db_session.commit()
+        await db_session.refresh(db_obj)
 
         return db_obj
 
-    def update(  # pylint: disable=no-self-use
+    async def update(  # pylint: disable=no-self-use
         self,
-        db_session: Session,
+        db_session: AsyncSession,
         *,
         db_obj: ModelType,
         obj_in: Union[UpdateSchemaType, Dict[str, Any]],
@@ -104,19 +110,19 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 setattr(db_obj, field, update_data[field])
 
         db_session.add(db_obj)
-        db_session.commit()
-        db_session.refresh(db_obj)
+        await db_session.commit()
+        await db_session.refresh(db_obj)
 
         return db_obj
 
-    def remove(self, db_session: Session, *, identifier: int) -> ModelType:
+    async def remove(self, db_session: AsyncSession, *, identifier: int) -> ModelType:
         """
         Delete model instance by `identifier`.
         """
 
-        obj = db_session.get(self.model, identifier)
+        obj = await db_session.get(self.model, identifier)
 
-        db_session.delete(obj)
-        db_session.commit()
+        await db_session.delete(obj)
+        await db_session.commit()
 
         return obj

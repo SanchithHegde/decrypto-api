@@ -4,7 +4,8 @@ CRUD operations on `QuestionOrderItem` model instances.
 
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
 from app.models.question_order_item import QuestionOrderItem
@@ -22,32 +23,31 @@ class CRUDQuestionOrderItem(
     """
 
     @staticmethod
-    def get_by_question_number(
-        db_session: Session, *, question_number: int
+    async def get_by_question_number(
+        db_session: AsyncSession, *, question_number: int
     ) -> Optional[QuestionOrderItem]:
         """
         Obtain question order item by question number.
         """
 
-        return (
-            db_session.query(QuestionOrderItem)
-            .filter(QuestionOrderItem.question_number == question_number)
-            .first()
+        statement = select(QuestionOrderItem).where(
+            QuestionOrderItem.question_number == question_number
         )
 
+        return (await db_session.execute(statement)).scalar_one_or_none()
+
     @staticmethod
-    def get_by_question_id(
-        db_session: Session, *, question_id: int
+    async def get_by_question_id(
+        db_session: AsyncSession, *, question_id: int
     ) -> Optional[QuestionOrderItem]:
         """
         Obtain question order item by question ID.
         """
 
-        return (
-            db_session.query(QuestionOrderItem)
-            .filter(QuestionOrderItem.question_id == question_id)
-            .first()
+        statement = select(QuestionOrderItem).where(
+            QuestionOrderItem.question_id == question_id
         )
+        return (await db_session.execute(statement)).scalar_one_or_none()
 
 
 question_order_item = CRUDQuestionOrderItem(QuestionOrderItem)

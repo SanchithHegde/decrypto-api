@@ -1,7 +1,7 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud
 from app.models.question import Question
@@ -28,7 +28,7 @@ def horse_image_contents() -> bytes:
     return contents
 
 
-def create_random_question(db_session: Session) -> Question:
+async def create_random_question(db_session: AsyncSession) -> Question:
     answer = random_lower_string()
     content = horse_image_contents()
     question_in = QuestionCreate(
@@ -36,6 +36,6 @@ def create_random_question(db_session: Session) -> Question:
         content=content,
         content_type=png_content_type(),
     )
-    question = crud.question.create(db_session, obj_in=question_in)
+    question = await crud.question.create(db_session, obj_in=question_in)
 
     return question

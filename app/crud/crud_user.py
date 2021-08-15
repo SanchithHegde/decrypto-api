@@ -4,10 +4,8 @@ CRUD operations on `User` model instances.
 
 from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import func
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
@@ -29,7 +27,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         statement = select(User).where(User.email == email)
         return (await db_session.execute(statement)).scalar_one_or_none()
 
-    def create(self, db_session: Session, *, obj_in: UserCreate) -> User:
+    async def create(self, db_session: AsyncSession, *, obj_in: UserCreate) -> User:
         """
         Create a new user and insert it into the database.
         """
@@ -42,17 +40,17 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         )
 
         db_session.add(user_obj)
-        db_session.commit()
+        await db_session.commit()
 
         # Update the rank for the newly added user
-        self.update_ranks(db_session)
-        db_session.refresh(user_obj)
+        await self.update_ranks(db_session)
+        await db_session.refresh(user_obj)
 
         return user_obj
 
-    def update(
+    async def update(
         self,
-        db_session: Session,
+        db_session: AsyncSession,
         *,
         db_obj: User,
         obj_in: Union[UserUpdate, Dict[str, Any]],
@@ -79,7 +77,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if update_data.get("question_number"):
             update_data["question_number_updated_at"] = func.now()
 
-        user_obj = super().update(
+        user_obj = await super().update(
             db_session,
             db_obj=db_obj,
             obj_in=update_data,
@@ -89,25 +87,25 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         # If question number was updated, update the ranks after the user object was
         # updated.
         if update_data.get("question_number"):
-            self.update_ranks(db_session)
-            db_session.refresh(user_obj)
+            await self.update_ranks(db_session)
+            await db_session.refresh(user_obj)
 
         return user_obj
 
-    def remove(self, db_session: Session, *, identifier: int) -> User:
+    async def remove(self, db_session: AsyncSession, *, identifier: int) -> User:
         """
         Delete user by ID.
         """
 
-        user_obj = super().remove(db_session, identifier=identifier)
+        user_obj = await super().remove(db_session, identifier=identifier)
 
         # Update the ranks for the remaining users
-        self.update_ranks(db_session)
+        await self.update_ranks(db_session)
 
         return user_obj
 
-    def authenticate(
-        self, db_session: Session, *, email: str, password: str
+    async def authenticate(
+        self, db_session: AsyncSession, *, email: str, password: str
     ) -> Optional[User]:
         """
         Verifies that email address and password provided are correct.
@@ -116,7 +114,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         `User` instance if the details are correct.
         """
 
-        user_obj = self.get_by_email(db_session, email=email)
+        user_obj = await self.get_by_email(db_session, email=email)
 
         # User not found / incorrect email address
         if not user_obj:
@@ -141,7 +139,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return user_obj.is_superuser
 
     @staticmethod
-    def update_ranks(db_session: Session) -> None:
+    async def update_ranks(db_session: AsyncSession) -> None:
         """
         Updates ranks of all non-superusers.
         """
@@ -163,7 +161,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         #     AND decrypto_user.id = id_ranks.id;
 
         id_ranks = (
-            db_session.query(
+            select(
                 User.id,
                 func.dense_rank()
                 .over(
@@ -174,19 +172,26 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 )
                 .label("dense_rank"),
             )
-            .filter(User.is_superuser == False)  # pylint: disable=singleton-comparison
+            .where(User.is_superuser == False)  # pylint: disable=singleton-comparison
             .cte(name="id_ranks")
         )
-        db_session.query(User).filter(
-            User.is_superuser == False,  # pylint: disable=singleton-comparison
-            User.id == id_ranks.c.id,
-        ).update({User.rank: id_ranks.c.dense_rank}, synchronize_session=False)
+        # id_ranks = await db_session.execute(statement)
+        statement = (
+            update(User)
+            .where(
+                User.is_superuser == False,  # pylint: disable=singleton-comparison
+                User.id == id_ranks.c.id,
+            )
+            .values({User.rank: id_ranks.c.dense_rank})
+            .execution_options(synchronize_session=False)
+        )
+        await db_session.execute(statement)
 
-        db_session.commit()
+        await db_session.commit()
 
     @staticmethod
-    def get_leaderboard(
-        db_session: Session, skip: int = 0, limit: int = 100
+    async def get_leaderboard(
+        db_session: AsyncSession, skip: int = 0, limit: int = 100
     ) -> List[User]:
         """
         Returns a list of users in decreasing order of question numbers and increasing
@@ -194,16 +199,16 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         containing a maximum of `limit` number of elements.
         """
 
-        return (
-            db_session.query(User)
-            .filter(User.is_superuser == False)  # pylint: disable=singleton-comparison
+        statement = (
+            select(User)
+            .where(User.is_superuser == False)  # pylint: disable=singleton-comparison
             .order_by(
                 User.question_number.desc(), User.question_number_updated_at.asc()
             )
             .offset(skip)
             .limit(limit)
-            .all()
         )
+        return (await db_session.execute(statement)).scalars().all()
 
 
 user = CRUDUser(User)

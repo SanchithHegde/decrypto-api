@@ -35,7 +35,8 @@ async def verify_db_connectivity() -> None:
         # available
         async with SessionLocal() as db_session:
             await db_session.execute(text("SELECT 1;"))
-            LOGGER.info("Database connection successful")
+
+        LOGGER.info("Database connection successful")
 
     except Exception as exception:
         LOGGER.exception(exception)
