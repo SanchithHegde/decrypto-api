@@ -21,7 +21,7 @@ SQLAlchemy        = "^1.4.22"
 starlette-context = "^0.3.3"
 structlog         = "^21.1.0"
 tenacity          = "^8.0.1"
-uvicorn           = { extras = [ "standard" ], version = "^0.14.0" }
+uvicorn           = { extras = [ "standard" ], version = "^0.15.0" }
 
 [tool.poetry.dev-dependencies]
 black             = { version = "^21.6b0", allow-prereleases = true }
