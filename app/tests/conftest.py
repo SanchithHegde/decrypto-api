@@ -7,7 +7,8 @@ import logging
 from typing import AsyncGenerator, Dict, Generator
 
 import pytest
-from fastapi.testclient import TestClient
+from asgi_lifespan import LifespanManager
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -38,7 +39,7 @@ TestingSessionLocal = sessionmaker(
 )
 
 
-async def override_get_db_session() -> AsyncGenerator:
+async def override_get_db_session() -> AsyncGenerator[AsyncSession, None]:
     try:
         db_session = TestingSessionLocal()
         yield db_session
@@ -48,7 +49,7 @@ async def override_get_db_session() -> AsyncGenerator:
 
 
 @pytest.fixture(scope="session")
-def event_loop() -> Generator:
+def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     loop = asyncio.get_event_loop_policy().new_event_loop()
 
     yield loop
@@ -57,7 +58,7 @@ def event_loop() -> Generator:
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def create_tables() -> AsyncGenerator:
+async def create_tables() -> AsyncGenerator[None, None]:
     LOGGER.info("Creating tables")
 
     async with engine.begin() as connection:
@@ -86,24 +87,31 @@ async def create_tables() -> AsyncGenerator:
 
 
 @pytest.fixture(scope="session")
-def db_session() -> Generator:
-    yield TestingSessionLocal()
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
+    try:
+
+        db_session = TestingSessionLocal()
+        yield db_session
+
+    finally:
+        await db_session.close()
 
 
 @pytest.fixture(scope="module")
-def client() -> Generator:
-    with TestClient(app) as test_client:
-        yield test_client
+async def client() -> AsyncGenerator[AsyncClient, None]:
+    async with LifespanManager(app):
+        async with AsyncClient(app=app, base_url="http://testserver") as test_client:
+            yield test_client
 
 
 @pytest.fixture(scope="module")
-def superuser_token_headers(client: TestClient) -> Dict[str, str]:
-    return get_superuser_token_headers(client)
+async def superuser_token_headers(client: AsyncClient) -> Dict[str, str]:
+    return await get_superuser_token_headers(client)
 
 
 @pytest.fixture(scope="module")
 async def normal_user_token_headers(
-    client: TestClient, db_session: AsyncSession
+    client: AsyncClient, db_session: AsyncSession
 ) -> Dict[str, str]:
     return await authentication_token_from_email(
         client=client, email=settings.EMAIL_TEST_USER, db_session=db_session
