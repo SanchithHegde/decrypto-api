@@ -175,7 +175,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             .where(User.is_superuser == False)  # pylint: disable=singleton-comparison
             .cte(name="id_ranks")
         )
-        # id_ranks = await db_session.execute(statement)
         statement = (
             update(User)
             .where(
