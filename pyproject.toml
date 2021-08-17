@@ -25,6 +25,7 @@ tenacity          = "^8.0.1"
 uvicorn           = { extras = [ "standard" ], version = "^0.14.0" }
 
 [tool.poetry.dev-dependencies]
+asgi-lifespan     = { version = "^1.0.1", allow-prereleases = true }
 black             = { version = "^21.6b0", allow-prereleases = true }
 docformatter      = { version = "^1.4", allow-prereleases = true }
 httpx             = { version = "^0.18.2", allow-prereleases = true }
