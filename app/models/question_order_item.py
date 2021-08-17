@@ -37,13 +37,16 @@ class QuestionOrderItem(Base):  # pylint: disable=too-few-public-methods
 
     # SQLAlchemy relationship.
     # This doesn't add an attribute/column to the table in the database, but provides an
-    # attribute in the model instance whose value is populated (by SQLAlchemy) when it
-    # is first accessed. The value is populated by using the foreign key and performing
-    # a suitable JOIN operation.
+    # attribute in the model instance whose value is populated (by SQLAlchemy) eagerly
+    # (we can't use lazy loading with async SQLAlchemy dialects). The value is populated
+    # by using the foreign key and performing a suitable JOIN operation.
     # In this case, `question` is an instance of `Question` which has the same `id` as
     # the `question_id` in `self`.
     question: Mapped["Question"] = relationship(
-        "Question", uselist=False, viewonly=True
+        "Question",
+        lazy="selectin",
+        uselist=False,
+        viewonly=True,
     )
 
     def __repr__(self) -> str:
