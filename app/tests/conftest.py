@@ -89,7 +89,6 @@ async def create_tables() -> AsyncGenerator[None, None]:
 @pytest.fixture(scope="session")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     try:
-
         db_session = TestingSessionLocal()
         yield db_session
 
