@@ -86,7 +86,7 @@ async def send_test_email(email_to: str) -> None:
         template_str = file.read()
 
     await LOGGER.info("Sending test email", email=email_to)
-    send_email(
+    await send_email(
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,
@@ -115,7 +115,7 @@ async def send_reset_password_email(email_to: str, email: str, token: str) -> No
     server_host = settings.SERVER_HOST
     link = f"{server_host}/reset-password?token={token}"
     await LOGGER.info("Sending password recovery email", email=email_to)
-    send_email(
+    await send_email(
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,
@@ -151,7 +151,7 @@ async def send_new_account_email(email_to: str, username: str, password: str) ->
 
     link = settings.SERVER_HOST
     await LOGGER.info("Sending account creation email", email=email_to)
-    send_email(
+    await send_email(
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,
