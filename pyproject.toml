@@ -24,7 +24,7 @@ tenacity          = "^8.0.1"
 uvicorn           = { extras = [ "standard" ], version = "^0.15.0" }
 
 [tool.poetry.dev-dependencies]
-black             = { version = "^21.6b0", allow-prereleases = true }
+black             = { version = "^21.8b0", allow-prereleases = true }
 docformatter      = { version = "^1.4", allow-prereleases = true }
 isort             = { version = "^5.9.2", allow-prereleases = true }
 mypy              = { version = "^0.910", allow-prereleases = true }
