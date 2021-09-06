@@ -6,11 +6,11 @@ authors     = [ "Your Name <you@example.com>" ]
 
 [tool.poetry.dependencies]
 python            = "^3.9"
-alembic           = "^1.6.5"
+alembic           = "^1.7.1"
 asyncpg           = "^0.24.0"
 colorama          = "^0.4.4"
 emails            = "^0.6"
-fastapi           = "^0.68.0"
+fastapi           = "^0.68.1"
 gunicorn          = "^20.1.0"
 Jinja2            = "^3.0.1"
 passlib           = { extras = [ "argon2" ], version = "^1.7.4" }
@@ -18,7 +18,7 @@ psycopg2          = "^2.9.1"
 pydantic          = { extras = [ "dotenv", "email" ], version = "^1.8.2" }
 python-jose       = { extras = [ "cryptography" ], version = "^3.3.0" }
 python-multipart  = "^0.0.5"
-SQLAlchemy        = { extras = [ "asyncio" ], version = "^1.4.22" }
+SQLAlchemy        = { extras = [ "asyncio" ], version = "^1.4.23" }
 starlette-context = "^0.3.3"
 structlog         = "^21.1.0"
 tenacity          = "^8.0.1"
@@ -26,16 +26,16 @@ uvicorn           = { extras = [ "standard" ], version = "^0.15.0" }
 
 [tool.poetry.dev-dependencies]
 asgi-lifespan     = { version = "^1.0.1", allow-prereleases = true }
-black             = { version = "^21.6b0", allow-prereleases = true }
+black             = { version = "^21.8b0", allow-prereleases = true }
 docformatter      = { version = "^1.4", allow-prereleases = true }
 httpx             = { version = "^0.18.2", allow-prereleases = true }
 isort             = { version = "^5.9.2", allow-prereleases = true }
 mypy              = { version = "^0.910", allow-prereleases = true }
-pylint            = { version = "^2.9.3", allow-prereleases = true }
-pytest            = { version = "^6.2.4", allow-prereleases = true }
+pylint            = { version = "^2.10.2", allow-prereleases = true }
+pytest            = { version = "^6.2.5", allow-prereleases = true }
 pytest-asyncio    = { version = "^0.15.1", allow-prereleases = true }
 pytest-cov        = { version = "^2.12.1", allow-prereleases = true }
-sqlalchemy2-stubs = { version = "^0.0.2a5", allow-prereleases = true }
+sqlalchemy2-stubs = { version = "^0.0.2a15", allow-prereleases = true }
 
 [build-system]
 requires      = [ "poetry-core>=1.0.0" ]
