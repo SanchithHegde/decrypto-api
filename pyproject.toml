@@ -30,7 +30,7 @@ isort             = { version = "^5.9.2", allow-prereleases = true }
 mypy              = { version = "^0.910", allow-prereleases = true }
 pylint            = { version = "^2.11.1", allow-prereleases = true }
 pytest            = { version = "^6.2.5", allow-prereleases = true }
-pytest-cov        = { version = "^2.12.1", allow-prereleases = true }
+pytest-cov        = { version = "^3.0.0", allow-prereleases = true }
 sqlalchemy2-stubs = { version = "^0.0.2a17", allow-prereleases = true }
 
 [build-system]
