@@ -3,18 +3,23 @@
 
 from typing import Dict
 
-from fastapi.testclient import TestClient
+import pytest
+from httpx import AsyncClient
 
 from app.core.config import settings
 from app.tests.utils.utils import random_email, random_lower_string
 
+pytestmark = pytest.mark.asyncio
 
-def test_get_access_token(client: TestClient) -> None:
+
+async def test_get_access_token(client: AsyncClient) -> None:
     login_data = {
         "username": settings.FIRST_SUPERUSER,
         "password": settings.FIRST_SUPERUSER_PASSWORD,
     }
-    response = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    response = await client.post(
+        f"{settings.API_V1_STR}/login/access-token", data=login_data
+    )
     tokens = response.json()
 
     assert response.status_code == 200
@@ -22,20 +27,22 @@ def test_get_access_token(client: TestClient) -> None:
     assert tokens["access_token"]
 
 
-def test_not_get_access_token(client: TestClient) -> None:
+async def test_not_get_access_token(client: AsyncClient) -> None:
     login_data = {
         "username": random_email(),
         "password": random_lower_string(),
     }
-    response = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    response = await client.post(
+        f"{settings.API_V1_STR}/login/access-token", data=login_data
+    )
 
     assert response.status_code == 400
 
 
-def test_use_access_token(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+async def test_use_access_token(
+    client: AsyncClient, superuser_token_headers: Dict[str, str]
 ) -> None:
-    response = client.post(
+    response = await client.post(
         f"{settings.API_V1_STR}/login/test-token",
         headers=superuser_token_headers,
     )
