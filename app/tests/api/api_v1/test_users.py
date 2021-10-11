@@ -4,7 +4,7 @@
 from typing import Dict
 
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -15,11 +15,13 @@ from app.tests.utils.question_order_item import create_random_question_order_ite
 from app.tests.utils.user import authentication_token_from_email, create_random_user
 from app.tests.utils.utils import random_email, random_int, random_lower_string
 
+pytestmark = pytest.mark.asyncio
 
-def test_get_users_superuser_me(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+
+async def test_get_users_superuser_me(
+    client: AsyncClient, superuser_token_headers: Dict[str, str]
 ) -> None:
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/me", headers=superuser_token_headers
     )
     current_user = response.json()
@@ -29,10 +31,10 @@ def test_get_users_superuser_me(
     assert current_user["email"] == settings.FIRST_SUPERUSER
 
 
-def test_get_users_normal_user_me(
-    client: TestClient, normal_user_token_headers: Dict[str, str]
+async def test_get_users_normal_user_me(
+    client: AsyncClient, normal_user_token_headers: Dict[str, str]
 ) -> None:
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/me", headers=normal_user_token_headers
     )
     current_user = response.json()
@@ -42,14 +44,14 @@ def test_get_users_normal_user_me(
     assert current_user["email"] == settings.EMAIL_TEST_USER
 
 
-def test_create_user_new_email(
-    client: TestClient, superuser_token_headers: Dict[str, str], db_session: Session
+async def test_create_user_new_email(
+    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
 ) -> None:
     username = random_email()
     password = random_lower_string()
     full_name = random_lower_string()
     data = {"email": username, "password": password, "full_name": full_name}
-    response = client.post(
+    response = await client.post(
         f"{settings.API_V1_STR}/users/",
         headers=superuser_token_headers,
         json=data,
@@ -64,12 +66,12 @@ def test_create_user_new_email(
     assert user.email == created_user["email"]
 
 
-def test_get_existing_user(
-    client: TestClient, superuser_token_headers: Dict[str, str], db_session: Session
+async def test_get_existing_user(
+    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
 ) -> None:
     user = create_random_user(db_session)
     user_id = user.id
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=superuser_token_headers,
     )
@@ -84,11 +86,11 @@ def test_get_existing_user(
     assert existing_user.email == api_user["email"]
 
 
-def test_get_not_existing_user(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+async def test_get_not_existing_user(
+    client: AsyncClient, superuser_token_headers: Dict[str, str]
 ) -> None:
     user_id = -1
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=superuser_token_headers,
     )
@@ -96,13 +98,13 @@ def test_get_not_existing_user(
     assert response.status_code == 404
 
 
-def test_get_current_user_normal_user(
-    client: TestClient, normal_user_token_headers: Dict[str, str], db_session: Session
+async def test_get_current_user_normal_user(
+    client: AsyncClient, normal_user_token_headers: Dict[str, str], db_session: Session
 ) -> None:
     user = crud.user.get_by_email(db_session, email=settings.EMAIL_TEST_USER)
     assert user
     user_id = user.id
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=normal_user_token_headers,
     )
@@ -113,13 +115,13 @@ def test_get_current_user_normal_user(
     assert current_user["email"] == settings.EMAIL_TEST_USER
 
 
-def test_get_another_user_normal_user(
-    client: TestClient, normal_user_token_headers: Dict[str, str], db_session: Session
+async def test_get_another_user_normal_user(
+    client: AsyncClient, normal_user_token_headers: Dict[str, str], db_session: Session
 ) -> None:
     user = crud.user.get_by_email(db_session, email=settings.EMAIL_TEST_USER)
     assert user and user.id
     user_id = user.id - 1  # Any user ID other than current user
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=normal_user_token_headers,
     )
@@ -127,8 +129,8 @@ def test_get_another_user_normal_user(
     assert response.status_code == 400
 
 
-def test_create_user_existing_username(
-    client: TestClient, superuser_token_headers: Dict[str, str], db_session: Session
+async def test_create_user_existing_username(
+    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
 ) -> None:
     username = random_email()
     password = random_lower_string()
@@ -136,7 +138,7 @@ def test_create_user_existing_username(
     user_in = UserCreate(email=username, password=password, full_name=full_name)
     crud.user.create(db_session, obj_in=user_in)
     data = {"email": username, "password": password, "full_name": full_name}
-    response = client.post(
+    response = await client.post(
         f"{settings.API_V1_STR}/users/",
         headers=superuser_token_headers,
         json=data,
@@ -147,14 +149,14 @@ def test_create_user_existing_username(
     assert "_id" not in created_user
 
 
-def test_create_user_by_normal_user(
-    client: TestClient, normal_user_token_headers: Dict[str, str]
+async def test_create_user_by_normal_user(
+    client: AsyncClient, normal_user_token_headers: Dict[str, str]
 ) -> None:
     username = random_email()
     password = random_lower_string()
     full_name = random_lower_string()
     data = {"email": username, "password": password, "full_name": full_name}
-    response = client.post(
+    response = await client.post(
         f"{settings.API_V1_STR}/users/",
         headers=normal_user_token_headers,
         json=data,
@@ -163,14 +165,14 @@ def test_create_user_by_normal_user(
     assert response.status_code == 400
 
 
-def test_retrieve_users(
-    client: TestClient, superuser_token_headers: Dict[str, str], db_session: Session
+async def test_retrieve_users(
+    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
 ) -> None:
     create_random_user(db_session)
     create_random_user(db_session)
     create_random_user(db_session)
 
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/", headers=superuser_token_headers
     )
     all_users = response.json()
@@ -180,15 +182,15 @@ def test_retrieve_users(
         assert "email" in user
 
 
-def test_update_user_normal_user_me(
-    client: TestClient, normal_user_token_headers: Dict[str, str]
+async def test_update_user_normal_user_me(
+    client: AsyncClient, normal_user_token_headers: Dict[str, str]
 ) -> None:
     data = {
         "email": random_email(),
         "password": random_lower_string(),
         "full_name": random_lower_string(),
     }
-    response = client.put(
+    response = await client.put(
         f"{settings.API_V1_STR}/users/me",
         headers=normal_user_token_headers,
         json=data,
@@ -204,13 +206,13 @@ def test_update_user_normal_user_me(
 @pytest.mark.skipif(
     not settings.USERS_OPEN_REGISTRATION, reason="Open user registration disabled"
 )
-def test_create_user_open(client: TestClient) -> None:
+async def test_create_user_open(client: AsyncClient) -> None:
     data = {
         "email": random_email(),
         "password": random_lower_string(),
         "full_name": random_lower_string(),
     }
-    response = client.post(
+    response = await client.post(
         f"{settings.API_V1_STR}/users/open",
         json=data,
     )
@@ -225,8 +227,8 @@ def test_create_user_open(client: TestClient) -> None:
 @pytest.mark.skipif(
     not settings.USERS_OPEN_REGISTRATION, reason="Open user registration disabled"
 )
-def test_create_user_open_existing_username(
-    client: TestClient, db_session: Session
+async def test_create_user_open_existing_username(
+    client: AsyncClient, db_session: Session
 ) -> None:
     username = random_email()
     password = random_lower_string()
@@ -234,7 +236,7 @@ def test_create_user_open_existing_username(
     user_in = UserCreate(email=username, password=password, full_name=full_name)
     crud.user.create(db_session, obj_in=user_in)
     data = {"email": username, "password": password, "full_name": full_name}
-    response = client.post(
+    response = await client.post(
         f"{settings.API_V1_STR}/users/open",
         json=data,
     )
@@ -242,8 +244,8 @@ def test_create_user_open_existing_username(
     assert response.status_code == 400
 
 
-def test_update_user_existing_user(
-    client: TestClient, superuser_token_headers: Dict[str, str], db_session: Session
+async def test_update_user_existing_user(
+    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
 ) -> None:
     user = create_random_user(db_session)
     data = {
@@ -251,7 +253,7 @@ def test_update_user_existing_user(
         "full_name": random_lower_string(),
         "is_superuser": True,
     }
-    response = client.put(
+    response = await client.put(
         f"{settings.API_V1_STR}/users/{user.id}",
         headers=superuser_token_headers,
         json=data,
@@ -264,8 +266,8 @@ def test_update_user_existing_user(
     assert api_user["full_name"] == data["full_name"]
 
 
-def test_update_user_not_existing_user(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+async def test_update_user_not_existing_user(
+    client: AsyncClient, superuser_token_headers: Dict[str, str]
 ) -> None:
     user_id = -1
     data = {
@@ -274,7 +276,7 @@ def test_update_user_not_existing_user(
         "full_name": random_lower_string(),
         "is_superuser": True,
     }
-    response = client.put(
+    response = await client.put(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=superuser_token_headers,
         json=data,
@@ -283,12 +285,12 @@ def test_update_user_not_existing_user(
     assert response.status_code == 404
 
 
-def test_delete_user_existing_user(
-    client: TestClient, superuser_token_headers: Dict[str, str], db_session: Session
+async def test_delete_user_existing_user(
+    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
 ) -> None:
     user = create_random_user(db_session)
     user_id = user.id
-    response = client.delete(
+    response = await client.delete(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=superuser_token_headers,
     )
@@ -296,11 +298,11 @@ def test_delete_user_existing_user(
     assert 200 <= response.status_code < 300
 
 
-def test_delete_user_not_existing_user(
-    client: TestClient, superuser_token_headers: Dict[str, str]
+async def test_delete_user_not_existing_user(
+    client: AsyncClient, superuser_token_headers: Dict[str, str]
 ) -> None:
     user_id = -1
-    response = client.delete(
+    response = await client.delete(
         f"{settings.API_V1_STR}/users/{user_id}",
         headers=superuser_token_headers,
     )
@@ -308,18 +310,18 @@ def test_delete_user_not_existing_user(
     assert response.status_code == 404
 
 
-def test_get_question(client: TestClient, db_session: Session) -> None:
+async def test_get_question(client: AsyncClient, db_session: Session) -> None:
     question_order_item = create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
     user = create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email  # Required for mypy
-    normal_user_token_headers = authentication_token_from_email(
+    normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
     )
 
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/question", headers=normal_user_token_headers
     )
 
@@ -331,19 +333,19 @@ def test_get_question(client: TestClient, db_session: Session) -> None:
     assert "content_type" in question_data
 
 
-def test_get_question_image(client: TestClient, db_session: Session) -> None:
+async def test_get_question_image(client: AsyncClient, db_session: Session) -> None:
     question_order_item = create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
     user = create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email  # Required for mypy
-    normal_user_token_headers = authentication_token_from_email(
+    normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
     )
     params = {"image": True}
 
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/question",
         headers=normal_user_token_headers,
         params=params,
@@ -356,17 +358,19 @@ def test_get_question_image(client: TestClient, db_session: Session) -> None:
     assert response.headers[content_type_header] == png_content_type()
 
 
-def test_get_question_redirect_if_none(client: TestClient, db_session: Session) -> None:
+async def test_get_question_redirect_if_none(
+    client: AsyncClient, db_session: Session
+) -> None:
     question_number = random_int()
     user = create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email  # Required for mypy
-    normal_user_token_headers = authentication_token_from_email(
+    normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
     )
 
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/question",
         headers=normal_user_token_headers,
         allow_redirects=False,
@@ -375,19 +379,19 @@ def test_get_question_redirect_if_none(client: TestClient, db_session: Session) 
     assert response.status_code == 307
 
 
-def test_get_question_redirect_if_none_allow_redirects(
-    client: TestClient, db_session: Session
+async def test_get_question_redirect_if_none_allow_redirects(
+    client: AsyncClient, db_session: Session
 ) -> None:
     question_number = random_int()
     user = create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email  # Required for mypy
-    normal_user_token_headers = authentication_token_from_email(
+    normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
     )
 
-    response = client.get(
+    response = await client.get(
         f"{settings.API_V1_STR}/users/question",
         headers=normal_user_token_headers,
         allow_redirects=True,
@@ -400,20 +404,22 @@ def test_get_question_redirect_if_none_allow_redirects(
     assert "message" in message_json
 
 
-def test_verify_answer_correct_answer(client: TestClient, db_session: Session) -> None:
+async def test_verify_answer_correct_answer(
+    client: AsyncClient, db_session: Session
+) -> None:
     question_order_item = create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
     user = create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email
-    normal_user_token_headers = authentication_token_from_email(
+    normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
     )
     answer = question_order_item.question.answer
     data = {"answer": answer}
 
-    response = client.post(
+    response = await client.post(
         f"{settings.API_V1_STR}/users/answer",
         headers=normal_user_token_headers,
         json=data,
@@ -435,8 +441,8 @@ def test_verify_answer_correct_answer(client: TestClient, db_session: Session) -
     assert updated_user.rank >= old_rank
 
 
-def test_verify_answer_incorrect_answer(
-    client: TestClient, db_session: Session
+async def test_verify_answer_incorrect_answer(
+    client: AsyncClient, db_session: Session
 ) -> None:
     question_order_item = create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
@@ -444,13 +450,13 @@ def test_verify_answer_incorrect_answer(
     user_in_update = UserUpdate(question_number=question_number)
     user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email
-    normal_user_token_headers = authentication_token_from_email(
+    normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
     )
     answer = random_lower_string()
     data = {"answer": answer}
 
-    response = client.post(
+    response = await client.post(
         f"{settings.API_V1_STR}/users/answer",
         headers=normal_user_token_headers,
         json=data,
@@ -471,12 +477,12 @@ def test_verify_answer_incorrect_answer(
     assert unmodified_user.rank == old_rank
 
 
-def test_retrieve_leaderboard(client: TestClient, db_session: Session) -> None:
+async def test_retrieve_leaderboard(client: AsyncClient, db_session: Session) -> None:
     create_random_user(db_session)
     create_random_user(db_session)
     create_random_user(db_session)
 
-    response = client.get(f"{settings.API_V1_STR}/users/leaderboard")
+    response = await client.get(f"{settings.API_V1_STR}/users/leaderboard")
     all_users = response.json()
 
     assert len(all_users) > 1
