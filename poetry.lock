@@ -901,7 +901,7 @@ sqlcipher = ["sqlcipher3-binary"]
 
 [[package]]
 name = "sqlalchemy2-stubs"
-version = "0.0.2a17"
+version = "0.0.2a19"
 description = "Typing Stubs for SQLAlchemy 1.4"
 category = "dev"
 optional = false
@@ -1067,7 +1067,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "1b400fcac722ebf5dfb485fad66ad7dd654baa39d15e158e4dabc23bad7ed65a"
+content-hash = "534eda52ee860c14081126364fd275920312c4de12067a3ad40ed49573020532"
 
 [metadata.files]
 alembic = [
@@ -1829,8 +1829,8 @@ sqlalchemy = [
     {file = "SQLAlchemy-1.4.26.tar.gz", hash = "sha256:6bc7f9d7d90ef55e8c6db1308a8619cd8f40e24a34f759119b95e7284dca351a"},
 ]
 sqlalchemy2-stubs = [
-    {file = "sqlalchemy2-stubs-0.0.2a17.tar.gz", hash = "sha256:d7e1f63f82711c83d49eb6adccbf6bbf3cc94783436c0d34cf7ae49820023046"},
-    {file = "sqlalchemy2_stubs-0.0.2a17-py3-none-any.whl", hash = "sha256:6f112f9381a29575676c3012ce10ed6bceabfad11f1d5569d7072ccf66cfa060"},
+    {file = "sqlalchemy2-stubs-0.0.2a19.tar.gz", hash = "sha256:2117c48ce5acfe33bf9c9bfce2a981632d931949e68fa313aa5c2a3bc980ca7a"},
+    {file = "sqlalchemy2_stubs-0.0.2a19-py3-none-any.whl", hash = "sha256:aac7dca77a2c49e5f0934976421d5e25ae4dc5e27db48c01e055f81caa1e3ead"},
 ]
 starlette = [
     {file = "starlette-0.16.0-py3-none-any.whl", hash = "sha256:38eb24bf705a2c317e15868e384c1b8a12ca396e5a3c3a003db7e667c43f939f"},
