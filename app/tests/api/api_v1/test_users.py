@@ -373,7 +373,7 @@ async def test_get_question_redirect_if_none(
     response = await client.get(
         f"{settings.API_V1_STR}/users/question",
         headers=normal_user_token_headers,
-        allow_redirects=False,
+        follow_redirects=False,
     )
 
     assert response.status_code == 307
@@ -394,7 +394,7 @@ async def test_get_question_redirect_if_none_allow_redirects(
     response = await client.get(
         f"{settings.API_V1_STR}/users/question",
         headers=normal_user_token_headers,
-        allow_redirects=True,
+        follow_redirects=True,
     )
 
     assert 200 <= response.status_code < 300
