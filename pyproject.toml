@@ -19,7 +19,7 @@ python-jose       = { extras = [ "cryptography" ], version = "^3.3.0" }
 python-multipart  = "^0.0.5"
 SQLAlchemy        = "^1.4.27"
 starlette-context = "^0.3.3"
-structlog         = "^21.2.0"
+structlog         = "^21.3.0"
 tenacity          = "^8.0.1"
 uvicorn           = { extras = [ "standard" ], version = "^0.15.0" }
 
