@@ -196,4 +196,4 @@ Refer to the https://pre-commit.com/#install[`pre-commit` docs] for installation
 
 == License
 
-TBD
+link:LICENSE[MIT]
