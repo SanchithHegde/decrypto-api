@@ -122,6 +122,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         obj = await db_session.get(self.model, identifier)
 
+        assert obj
+
         await db_session.delete(obj)
         await db_session.commit()
 
