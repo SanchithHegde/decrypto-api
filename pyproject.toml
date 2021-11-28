@@ -5,7 +5,7 @@ description = "Decrypto API"
 authors     = [ "Your Name <you@example.com>" ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 alembic = "^1.7.5"
 asyncpg = "^0.24.0"
 colorama = "^0.4.4"
