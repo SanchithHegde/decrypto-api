@@ -82,11 +82,13 @@ async def send_test_email(email_to: str) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Test email"
 
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "test_email.html") as file:
+    with open(
+        Path(settings.EMAIL_TEMPLATES_DIR) / "test_email.html", encoding="UTF-8"
+    ) as file:
         template_str = file.read()
 
     await LOGGER.info("Sending test email", email=email_to)
-    send_email(
+    await send_email(
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,
@@ -109,13 +111,15 @@ async def send_reset_password_email(email_to: str, email: str, token: str) -> No
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Password recovery for user {email}"
 
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "reset_password.html") as file:
+    with open(
+        Path(settings.EMAIL_TEMPLATES_DIR) / "reset_password.html", encoding="UTF-8"
+    ) as file:
         template_str = file.read()
 
     server_host = settings.SERVER_HOST
     link = f"{server_host}/reset-password?token={token}"
     await LOGGER.info("Sending password recovery email", email=email_to)
-    send_email(
+    await send_email(
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,
@@ -146,12 +150,14 @@ async def send_new_account_email(email_to: str, username: str, password: str) ->
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - New account for user {username}"
 
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "new_account.html") as file:
+    with open(
+        Path(settings.EMAIL_TEMPLATES_DIR) / "new_account.html", encoding="UTF-8"
+    ) as file:
         template_str = file.read()
 
     link = settings.SERVER_HOST
     await LOGGER.info("Sending account creation email", email=email_to)
-    send_email(
+    await send_email(
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,

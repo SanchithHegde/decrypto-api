@@ -5,7 +5,7 @@ from typing import Dict
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud
 from app.core.config import settings
@@ -45,7 +45,9 @@ async def test_get_users_normal_user_me(
 
 
 async def test_create_user_new_email(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
     username = random_email()
     password = random_lower_string()
@@ -60,16 +62,18 @@ async def test_create_user_new_email(
     assert 200 <= response.status_code < 300
 
     created_user = response.json()
-    user = crud.user.get_by_email(db_session, email=username)
+    user = await crud.user.get_by_email(db_session, email=username)
 
     assert user
     assert user.email == created_user["email"]
 
 
 async def test_get_existing_user(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     user_id = user.id
     response = await client.get(
         f"{settings.API_V1_STR}/users/{user_id}",
@@ -80,7 +84,7 @@ async def test_get_existing_user(
 
     api_user = response.json()
     assert user.email
-    existing_user = crud.user.get_by_email(db_session, email=user.email)
+    existing_user = await crud.user.get_by_email(db_session, email=user.email)
 
     assert existing_user
     assert existing_user.email == api_user["email"]
@@ -99,9 +103,11 @@ async def test_get_not_existing_user(
 
 
 async def test_get_current_user_normal_user(
-    client: AsyncClient, normal_user_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    normal_user_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    user = crud.user.get_by_email(db_session, email=settings.EMAIL_TEST_USER)
+    user = await crud.user.get_by_email(db_session, email=settings.EMAIL_TEST_USER)
     assert user
     user_id = user.id
     response = await client.get(
@@ -116,9 +122,11 @@ async def test_get_current_user_normal_user(
 
 
 async def test_get_another_user_normal_user(
-    client: AsyncClient, normal_user_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    normal_user_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    user = crud.user.get_by_email(db_session, email=settings.EMAIL_TEST_USER)
+    user = await crud.user.get_by_email(db_session, email=settings.EMAIL_TEST_USER)
     assert user and user.id
     user_id = user.id - 1  # Any user ID other than current user
     response = await client.get(
@@ -130,13 +138,15 @@ async def test_get_another_user_normal_user(
 
 
 async def test_create_user_existing_username(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
     username = random_email()
     password = random_lower_string()
     full_name = random_lower_string()
     user_in = UserCreate(email=username, password=password, full_name=full_name)
-    crud.user.create(db_session, obj_in=user_in)
+    await crud.user.create(db_session, obj_in=user_in)
     data = {"email": username, "password": password, "full_name": full_name}
     response = await client.post(
         f"{settings.API_V1_STR}/users/",
@@ -166,11 +176,13 @@ async def test_create_user_by_normal_user(
 
 
 async def test_retrieve_users(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    create_random_user(db_session)
-    create_random_user(db_session)
-    create_random_user(db_session)
+    await create_random_user(db_session)
+    await create_random_user(db_session)
+    await create_random_user(db_session)
 
     response = await client.get(
         f"{settings.API_V1_STR}/users/", headers=superuser_token_headers
@@ -228,13 +240,13 @@ async def test_create_user_open(client: AsyncClient) -> None:
     not settings.USERS_OPEN_REGISTRATION, reason="Open user registration disabled"
 )
 async def test_create_user_open_existing_username(
-    client: AsyncClient, db_session: Session
+    client: AsyncClient, db_session: AsyncSession
 ) -> None:
     username = random_email()
     password = random_lower_string()
     full_name = random_lower_string()
     user_in = UserCreate(email=username, password=password, full_name=full_name)
-    crud.user.create(db_session, obj_in=user_in)
+    await crud.user.create(db_session, obj_in=user_in)
     data = {"email": username, "password": password, "full_name": full_name}
     response = await client.post(
         f"{settings.API_V1_STR}/users/open",
@@ -245,9 +257,11 @@ async def test_create_user_open_existing_username(
 
 
 async def test_update_user_existing_user(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     data = {
         "email": random_email(),
         "full_name": random_lower_string(),
@@ -286,9 +300,11 @@ async def test_update_user_not_existing_user(
 
 
 async def test_delete_user_existing_user(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     user_id = user.id
     response = await client.delete(
         f"{settings.API_V1_STR}/users/{user_id}",
@@ -310,12 +326,12 @@ async def test_delete_user_not_existing_user(
     assert response.status_code == 404
 
 
-async def test_get_question(client: AsyncClient, db_session: Session) -> None:
-    question_order_item = create_random_question_order_item(db_session)
+async def test_get_question(client: AsyncClient, db_session: AsyncSession) -> None:
+    question_order_item = await create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
-    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    user = await crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email  # Required for mypy
     normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
@@ -333,12 +349,14 @@ async def test_get_question(client: AsyncClient, db_session: Session) -> None:
     assert "content_type" in question_data
 
 
-async def test_get_question_image(client: AsyncClient, db_session: Session) -> None:
-    question_order_item = create_random_question_order_item(db_session)
+async def test_get_question_image(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
+    question_order_item = await create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
-    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    user = await crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email  # Required for mypy
     normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
@@ -359,12 +377,12 @@ async def test_get_question_image(client: AsyncClient, db_session: Session) -> N
 
 
 async def test_get_question_redirect_if_none(
-    client: AsyncClient, db_session: Session
+    client: AsyncClient, db_session: AsyncSession
 ) -> None:
     question_number = random_int()
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
-    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    user = await crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email  # Required for mypy
     normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
@@ -380,12 +398,12 @@ async def test_get_question_redirect_if_none(
 
 
 async def test_get_question_redirect_if_none_allow_redirects(
-    client: AsyncClient, db_session: Session
+    client: AsyncClient, db_session: AsyncSession
 ) -> None:
     question_number = random_int()
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
-    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    user = await crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email  # Required for mypy
     normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
@@ -405,13 +423,13 @@ async def test_get_question_redirect_if_none_allow_redirects(
 
 
 async def test_verify_answer_correct_answer(
-    client: AsyncClient, db_session: Session
+    client: AsyncClient, db_session: AsyncSession
 ) -> None:
-    question_order_item = create_random_question_order_item(db_session)
+    question_order_item = await create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
-    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    user = await crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email
     normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
@@ -430,8 +448,8 @@ async def test_verify_answer_correct_answer(
     assert user.id
     assert user.rank
     old_rank = user.rank
-    updated_user = crud.user.get(db_session, identifier=user.id)
-    db_session.refresh(updated_user)
+    updated_user = await crud.user.get(db_session, identifier=user.id)
+    await db_session.refresh(updated_user)
 
     assert updated_user
     assert updated_user.question_number
@@ -442,13 +460,13 @@ async def test_verify_answer_correct_answer(
 
 
 async def test_verify_answer_incorrect_answer(
-    client: AsyncClient, db_session: Session
+    client: AsyncClient, db_session: AsyncSession
 ) -> None:
-    question_order_item = create_random_question_order_item(db_session)
+    question_order_item = await create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
-    user = create_random_user(db_session)
+    user = await create_random_user(db_session)
     user_in_update = UserUpdate(question_number=question_number)
-    user = crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
+    user = await crud.user.update(db_session, db_obj=user, obj_in=user_in_update)
     assert user.email
     normal_user_token_headers = await authentication_token_from_email(
         client=client, email=user.email, db_session=db_session
@@ -467,7 +485,7 @@ async def test_verify_answer_incorrect_answer(
     assert user.id
     assert user.rank
     old_rank = user.rank
-    unmodified_user = crud.user.get(db_session, identifier=user.id)
+    unmodified_user = await crud.user.get(db_session, identifier=user.id)
 
     assert unmodified_user
     assert unmodified_user.question_number
@@ -477,10 +495,12 @@ async def test_verify_answer_incorrect_answer(
     assert unmodified_user.rank == old_rank
 
 
-async def test_retrieve_leaderboard(client: AsyncClient, db_session: Session) -> None:
-    create_random_user(db_session)
-    create_random_user(db_session)
-    create_random_user(db_session)
+async def test_retrieve_leaderboard(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
+    await create_random_user(db_session)
+    await create_random_user(db_session)
+    await create_random_user(db_session)
 
     response = await client.get(f"{settings.API_V1_STR}/users/leaderboard")
     all_users = response.json()

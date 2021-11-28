@@ -5,7 +5,7 @@ from typing import Dict
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud
 from app.core.config import settings
@@ -74,7 +74,9 @@ async def test_create_question_not_accept_gif(
 
 
 async def test_create_question_new_answer(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
     answer = random_lower_string()
     data = {"answer": answer}
@@ -91,7 +93,7 @@ async def test_create_question_new_answer(
     assert 200 <= response.status_code < 300
 
     created_question = response.json()
-    question = crud.question.get_by_answer(db_session, answer=answer)
+    question = await crud.question.get_by_answer(db_session, answer=answer)
 
     assert question
     assert "id" in created_question
@@ -100,7 +102,9 @@ async def test_create_question_new_answer(
 
 
 async def test_create_question_existing_answer(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
     answer = random_lower_string()
     question_in = QuestionCreate(
@@ -108,7 +112,7 @@ async def test_create_question_existing_answer(
         content=horse_image_contents(),
         content_type=png_content_type(),
     )
-    crud.question.create(db_session, obj_in=question_in)
+    await crud.question.create(db_session, obj_in=question_in)
     data = {"answer": answer}
     files = {
         "image": (random_lower_string(), horse_image_contents(), png_content_type())
@@ -124,9 +128,11 @@ async def test_create_question_existing_answer(
 
 
 async def test_get_existing_question(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    question = create_random_question(db_session)
+    question = await create_random_question(db_session)
     question_id = question.id
     response = await client.get(
         f"{settings.API_V1_STR}/questions/{question_id}",
@@ -137,16 +143,20 @@ async def test_get_existing_question(
 
     api_question = response.json()
     assert question.answer
-    existing_question = crud.question.get_by_answer(db_session, answer=question.answer)
+    existing_question = await crud.question.get_by_answer(
+        db_session, answer=question.answer
+    )
 
     assert existing_question
     assert existing_question.answer == api_question["answer"]
 
 
 async def test_get_existing_question_image(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    question = create_random_question(db_session)
+    question = await create_random_question(db_session)
     question_id = question.id
     params = {"image": True}
     response = await client.get(
@@ -175,11 +185,13 @@ async def test_get_not_existing_question(
 
 
 async def test_retrieve_questions(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    create_random_question(db_session)
-    create_random_question(db_session)
-    create_random_question(db_session)
+    await create_random_question(db_session)
+    await create_random_question(db_session)
+    await create_random_question(db_session)
 
     response = await client.get(
         f"{settings.API_V1_STR}/questions/", headers=superuser_token_headers
@@ -192,9 +204,11 @@ async def test_retrieve_questions(
 
 
 async def test_update_existing_question(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    question = create_random_question(db_session)
+    question = await create_random_question(db_session)
     question_id = question.id
     new_answer = random_lower_string()
     data = {"answer": new_answer}
@@ -230,10 +244,12 @@ async def test_update_not_existing_question(
 
 
 async def test_update_existing_question_duplicate_answer(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    question = create_random_question(db_session)
-    question2 = create_random_question(db_session)
+    question = await create_random_question(db_session)
+    question2 = await create_random_question(db_session)
     question_id = question.id
     new_answer = question2.answer
     data = {"answer": new_answer}
@@ -247,9 +263,11 @@ async def test_update_existing_question_duplicate_answer(
 
 
 async def test_delete_existing_question(
-    client: AsyncClient, superuser_token_headers: Dict[str, str], db_session: Session
+    client: AsyncClient,
+    superuser_token_headers: Dict[str, str],
+    db_session: AsyncSession,
 ) -> None:
-    question = create_random_question(db_session)
+    question = await create_random_question(db_session)
     question_id = question.id
     response = await client.delete(
         f"{settings.API_V1_STR}/questions/{question_id}",

@@ -2,13 +2,13 @@
 Dependencies used by FastAPI for its dependency injection system.
 """
 
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator
 
 from fastapi import Depends, File, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt  # type: ignore
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from structlog.contextvars import bind_contextvars, unbind_contextvars
 
 from app import LOGGER, crud, models, schemas
@@ -21,7 +21,7 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 
 
-def get_db_session() -> Generator:
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     Provides a database session instance.
     """
@@ -31,11 +31,12 @@ def get_db_session() -> Generator:
         yield db_session
 
     finally:
-        db_session.close()
+        await db_session.close()
 
 
 async def get_current_user(
-    db_session: Session = Depends(get_db_session), token: str = Depends(reusable_oauth2)
+    db_session: AsyncSession = Depends(get_db_session),
+    token: str = Depends(reusable_oauth2),
 ) -> AsyncGenerator[models.User, None]:
     """
     Provides the current logged in user.
@@ -60,7 +61,7 @@ async def get_current_user(
 
     assert token_data.sub is not None
 
-    user = crud.user.get(db_session, identifier=token_data.sub)
+    user = await crud.user.get(db_session, identifier=token_data.sub)
     if not user:
         await LOGGER.error("User not found")
 

@@ -5,7 +5,7 @@ API endpoints for question order item operations.
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import LOGGER, crud, models, schemas
 from app.api import dependencies
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/questions_order", tags=["questions_order"])
 async def read_question_order_items(
     skip: int = 0,
     limit: int = 100,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -32,7 +32,7 @@ async def read_question_order_items(
     """
 
     await LOGGER.info("Superuser listed question order items", skip=skip, limit=limit)
-    question_order_items = crud.question_order_item.get_multi(
+    question_order_items = await crud.question_order_item.get_multi(
         db_session, skip=skip, limit=limit
     )
 
@@ -47,7 +47,7 @@ async def read_question_order_items(
 async def create_question_order_item(
     *,
     question_order_item_in: schemas.QuestionOrderItemCreate,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -56,7 +56,7 @@ async def create_question_order_item(
     **Needs superuser privileges.**
     """
 
-    question = crud.question.get(
+    question = await crud.question.get(
         db_session, identifier=question_order_item_in.question_id
     )
 
@@ -74,7 +74,7 @@ async def create_question_order_item(
     assert question_order_item_in.question_number is not None
 
     # Question number should be unique
-    question_order_item = crud.question_order_item.get_by_question_number(
+    question_order_item = await crud.question_order_item.get_by_question_number(
         db_session, question_number=question_order_item_in.question_number
     )
 
@@ -90,7 +90,7 @@ async def create_question_order_item(
         )
 
     # Question ID should be unique
-    question_order_item = crud.question_order_item.get_by_question_id(
+    question_order_item = await crud.question_order_item.get_by_question_id(
         db_session, question_id=question_order_item_in.question_id
     )
 
@@ -105,7 +105,7 @@ async def create_question_order_item(
             detail="This question is already associated with a question number",
         )
 
-    question_order_item = crud.question_order_item.create(
+    question_order_item = await crud.question_order_item.create(
         db_session, obj_in=question_order_item_in
     )
     await LOGGER.info(
@@ -126,7 +126,7 @@ async def create_question_order_item(
 )
 async def read_question_order_item_by_id(
     question_order_item_id: int,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -136,7 +136,7 @@ async def read_question_order_item_by_id(
     **Needs superuser privileges.**
     """
 
-    question_order_item = crud.question_order_item.get(
+    question_order_item = await crud.question_order_item.get(
         db_session, identifier=question_order_item_id
     )
 
@@ -174,7 +174,7 @@ async def update_question_order_item(
     *,
     question_order_item_id: int,
     question_order_item_in: schemas.QuestionOrderItemUpdate,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -184,7 +184,7 @@ async def update_question_order_item(
     **Needs superuser privileges.**
     """
 
-    question_order_item = crud.question_order_item.get(
+    question_order_item = await crud.question_order_item.get(
         db_session, identifier=question_order_item_id
     )
 
@@ -203,7 +203,7 @@ async def update_question_order_item(
         )
 
     if question_order_item_in.question_id is not None:
-        question = crud.question.get(
+        question = await crud.question.get(
             db_session, identifier=question_order_item_in.question_id
         )
 
@@ -219,7 +219,7 @@ async def update_question_order_item(
             )
 
         # Question ID should be unique
-        duplicate_question = crud.question_order_item.get_by_question_id(
+        duplicate_question = await crud.question_order_item.get_by_question_id(
             db_session, question_id=question_order_item_in.question_id
         )
 
@@ -236,8 +236,10 @@ async def update_question_order_item(
 
     if question_order_item_in.question_number is not None:
         # Question number should be unique
-        duplicate_question_number = crud.question_order_item.get_by_question_number(
-            db_session, question_number=question_order_item_in.question_number
+        duplicate_question_number = (
+            await crud.question_order_item.get_by_question_number(
+                db_session, question_number=question_order_item_in.question_number
+            )
         )
 
         if (
@@ -259,7 +261,7 @@ async def update_question_order_item(
         question_order_item=question_order_item,
         updated_details=question_order_item_in,
     )
-    question_order_item = crud.question_order_item.update(
+    question_order_item = await crud.question_order_item.update(
         db_session,
         db_obj=question_order_item,
         obj_in=question_order_item_in,
@@ -283,7 +285,7 @@ async def update_question_order_item(
 )
 async def delete_question_order_item(
     question_order_item_id: int,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -293,7 +295,7 @@ async def delete_question_order_item(
     **Needs superuser privileges.**
     """
 
-    question_order_item = crud.question_order_item.get(
+    question_order_item = await crud.question_order_item.get(
         db_session, identifier=question_order_item_id
     )
 
@@ -315,7 +317,7 @@ async def delete_question_order_item(
         "Superuser initiated question order item deletion",
         question_order_item=question_order_item,
     )
-    crud.question_order_item.remove(db_session, identifier=question_order_item_id)
+    await crud.question_order_item.remove(db_session, identifier=question_order_item_id)
     await LOGGER.info(
         "Superuser deleted question order item by ID",
         question_order_item=question_order_item,

@@ -2,7 +2,7 @@
 Creates initial data (first superuser) in the database.
 """
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import LOGGER, crud, schemas
 from app.core.config import settings
@@ -13,7 +13,7 @@ from app.db import base  # pylint: disable=unused-import
 # For more details: https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/28
 
 
-def init_db(db_session: Session) -> None:
+async def init_db(db_session: AsyncSession) -> None:
     """
     Adds the first superuser to the database if it doesn't exist already.
     """
@@ -23,7 +23,7 @@ def init_db(db_session: Session) -> None:
     # following line:
     # Base.metadata.create_all(bind=engine)
 
-    user = crud.user.get_by_email(db_session, email=settings.FIRST_SUPERUSER)
+    user = await crud.user.get_by_email(db_session, email=settings.FIRST_SUPERUSER)
 
     if not user:
         user_in = schemas.UserCreate(
@@ -32,7 +32,7 @@ def init_db(db_session: Session) -> None:
             full_name=settings.FIRST_SUPERUSER_NAME,
             is_superuser=True,
         )
-        user = crud.user.create(db_session, obj_in=user_in)
+        user = await crud.user.create(db_session, obj_in=user_in)
         LOGGER.info(
             "Added first superuser to the database", email=settings.FIRST_SUPERUSER
         )

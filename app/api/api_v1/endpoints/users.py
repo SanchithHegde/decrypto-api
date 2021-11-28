@@ -9,7 +9,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import RedirectResponse
 from pydantic.networks import EmailStr
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from structlog.contextvars import bind_contextvars, unbind_contextvars
 
 from app import LOGGER, crud, models, schemas
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def read_users(
     skip: int = 0,
     limit: int = 100,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -35,7 +35,7 @@ async def read_users(
     """
 
     await LOGGER.info("Superuser listed users", skip=skip, limit=limit)
-    users = crud.user.get_multi(db_session, skip=skip, limit=limit)
+    users = await crud.user.get_multi(db_session, skip=skip, limit=limit)
 
     return users
 
@@ -46,7 +46,7 @@ async def read_users(
 async def create_user(
     *,
     user_in: schemas.UserCreate,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -55,7 +55,7 @@ async def create_user(
     **Needs superuser privileges.**
     """
 
-    user = crud.user.get_by_email(db_session, email=user_in.email)
+    user = await crud.user.get_by_email(db_session, email=user_in.email)
 
     if user:
         await LOGGER.error("User with email already exists", email=user_in.email)
@@ -65,7 +65,7 @@ async def create_user(
             detail="The user with this email address already exists in the system.",
         )
 
-    user = crud.user.create(db_session, obj_in=user_in)
+    user = await crud.user.create(db_session, obj_in=user_in)
     await LOGGER.info("Superuser created new user", user=user)
 
     if settings.EMAILS_ENABLED and user_in.email:
@@ -82,7 +82,7 @@ async def update_user_me(
     password: str = Body(None),
     full_name: str = Body(None),
     email: EmailStr = Body(None),
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     current_user: models.User = Depends(dependencies.get_current_user),
 ) -> Any:
     """
@@ -108,7 +108,7 @@ async def update_user_me(
         full_name=full_name,
         password=temp_password,
     )
-    user = crud.user.update(db_session, db_obj=current_user, obj_in=user_in)
+    user = await crud.user.update(db_session, db_obj=current_user, obj_in=user_in)
     await LOGGER.info("User updated their own details", user=user)
 
     return user
@@ -139,7 +139,7 @@ async def create_user_open(
     full_name: str = Body(...),
     email: EmailStr = Body(...),
     password: str = Body(...),
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
 ) -> Any:
     """
     Create a new user without the need to be logged in.
@@ -159,7 +159,7 @@ async def create_user_open(
         full_name=full_name,
         password="[REDACTED]",
     )
-    user = crud.user.get_by_email(db_session, email=email)
+    user = await crud.user.get_by_email(db_session, email=email)
 
     if user:
         await LOGGER.error("User with email already exists", email=email)
@@ -170,7 +170,7 @@ async def create_user_open(
         )
 
     user_in = schemas.UserCreate(password=password, email=email, full_name=full_name)
-    user = crud.user.create(db_session, obj_in=user_in)
+    user = await crud.user.create(db_session, obj_in=user_in)
     await LOGGER.info("New user registered", user=user)
 
     if settings.EMAILS_ENABLED and user_in.email:
@@ -228,7 +228,7 @@ async def read_user_question(
 )
 async def verify_user_answer(
     answer_in: schemas.Answer,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     current_user: models.User = Depends(dependencies.get_current_user),
 ) -> Any:
     """
@@ -265,7 +265,7 @@ async def verify_user_answer(
     assert current_user.question_number
     new_question_number = current_user.question_number + 1
     user_update = schemas.UserUpdate(question_number=new_question_number)
-    user = crud.user.update(db_session, db_obj=current_user, obj_in=user_update)
+    user = await crud.user.update(db_session, db_obj=current_user, obj_in=user_update)
     await LOGGER.info(
         "User advanced to next question", question_number=new_question_number, user=user
     )
@@ -281,7 +281,7 @@ async def verify_user_answer(
 async def read_leaderboard(
     skip: int = 0,
     limit: int = 100,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
 ) -> Any:
     """
     Obtain the leaderboard starting at offset `skip` and containing a maximum of `limit`
@@ -291,7 +291,7 @@ async def read_leaderboard(
     """
 
     await LOGGER.debug("Leaderboard was accessed", skip=skip, limit=limit)
-    leaderboard = crud.user.get_leaderboard(db_session, skip=skip, limit=limit)
+    leaderboard = await crud.user.get_leaderboard(db_session, skip=skip, limit=limit)
 
     return leaderboard
 
@@ -318,7 +318,7 @@ async def game_over(_: models.User = Depends(dependencies.get_current_user)) -> 
 )
 async def read_user_by_id(
     user_id: int,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     current_user: models.User = Depends(dependencies.get_current_user),
 ) -> Any:
     """
@@ -330,7 +330,7 @@ async def read_user_by_id(
     * If the user is a superuser, they can obtain any user's details.
     """
 
-    user = crud.user.get(db_session, identifier=user_id)
+    user = await crud.user.get(db_session, identifier=user_id)
 
     if user == current_user:
         await LOGGER.info("User accessed their details by ID")
@@ -377,7 +377,7 @@ async def update_user(
     *,
     user_id: int,
     user_in: schemas.UserUpdate,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -386,7 +386,7 @@ async def update_user(
     **Needs superuser privileges.**
     """
 
-    user = crud.user.get(db_session, identifier=user_id)
+    user = await crud.user.get(db_session, identifier=user_id)
 
     if not user:
         await LOGGER.error("User does not exist", user_id=user_id)
@@ -405,7 +405,7 @@ async def update_user(
         user=user,
         updated_details=user_in_temp,
     )
-    user = crud.user.update(db_session, db_obj=user, obj_in=user_in)
+    user = await crud.user.update(db_session, db_obj=user, obj_in=user_in)
     await LOGGER.info("Superuser updated user's details by ID", user=user)
 
     return user
@@ -419,7 +419,7 @@ async def update_user(
 async def delete_user(
     *,
     user_id: int,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -428,7 +428,7 @@ async def delete_user(
     **Needs superuser privileges.**
     """
 
-    user = crud.user.get(db_session, identifier=user_id)
+    user = await crud.user.get(db_session, identifier=user_id)
 
     if not user:
         await LOGGER.error("User does not exist", user_id=user_id)
@@ -439,7 +439,7 @@ async def delete_user(
         )
 
     await LOGGER.info("Superuser initiated user deletion", user=user)
-    user = crud.user.remove(db_session, identifier=user_id)
+    user = await crud.user.remove(db_session, identifier=user_id)
     await LOGGER.info("Superuser deleted user by ID", user=user)
 
     return {"message": "User deleted successfully"}

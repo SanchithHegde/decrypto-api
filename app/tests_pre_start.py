@@ -2,6 +2,7 @@
 Pre-start script run before tests, to verify database connectivity.
 """
 
+import asyncio
 import logging
 
 from sqlalchemy import text
@@ -24,7 +25,7 @@ LOGGER = logging.getLogger("tests_pre_start")
     before=before_log(LOGGER, logging.INFO),
     after=after_log(LOGGER, logging.WARN),
 )
-def verify_db_connectivity() -> None:
+async def verify_db_connectivity() -> None:
     """
     Verify database connectivity.
     """
@@ -32,8 +33,9 @@ def verify_db_connectivity() -> None:
     try:
         # Try to create a session and execute a statement to check if database is
         # available
-        db_session = TestingSessionLocal()
-        db_session.execute(text("SELECT 1;"))
+        async with TestingSessionLocal() as db_session:
+            await db_session.execute(text("SELECT 1;"))
+
         LOGGER.info("Database connection successful")
 
     except Exception as exception:
@@ -41,15 +43,15 @@ def verify_db_connectivity() -> None:
         raise
 
 
-def main() -> None:
+async def main() -> None:
     """
     Driver function.
     """
 
     LOGGER.info("Initializing service")
-    verify_db_connectivity()
+    await verify_db_connectivity()
     LOGGER.info("Service finished initializing")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

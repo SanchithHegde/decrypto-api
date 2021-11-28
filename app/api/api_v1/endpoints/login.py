@@ -9,7 +9,7 @@ from typing import Any
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import LOGGER, crud, models, schemas
 from app.api import dependencies
@@ -30,14 +30,14 @@ router = APIRouter(tags=["login"])
     summary="Obtain a login access token",
 )
 async def login_access_token(
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Any:
     """
     Obtain an OAuth2 compatible access token, which can be used for future requests.
     """
 
-    user = crud.user.authenticate(
+    user = await crud.user.authenticate(
         db_session, email=form_data.username, password=form_data.password
     )
 
@@ -87,13 +87,13 @@ async def test_token(
     summary="Send a password recovery email",
 )
 async def recover_password(
-    email: str, db_session: Session = Depends(dependencies.get_db_session)
+    email: str, db_session: AsyncSession = Depends(dependencies.get_db_session)
 ) -> Any:
     """
     Send a password recovery email to the provided email address.
     """
 
-    user = crud.user.get_by_email(db_session, email=email)
+    user = await crud.user.get_by_email(db_session, email=email)
 
     if not user:
         await LOGGER.error("User not found", email=email)
@@ -122,7 +122,7 @@ async def recover_password(
 async def reset_password(
     token: str = Body(...),
     new_password: str = Body(...),
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
 ) -> Any:
     """
     Reset a user's password with the provided password.
@@ -140,7 +140,7 @@ async def reset_password(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token"
         )
 
-    user = crud.user.get_by_email(db_session, email=email)
+    user = await crud.user.get_by_email(db_session, email=email)
 
     if not user:
         await LOGGER.error("User not found", email=email)
@@ -154,7 +154,7 @@ async def reset_password(
     current_user_data = jsonable_encoder(user)
     user_in = schemas.UserUpdate(**current_user_data)
     user_in.password = new_password
-    user = crud.user.update(db_session, db_obj=user, obj_in=user_in)
+    user = await crud.user.update(db_session, db_obj=user, obj_in=user_in)
     await LOGGER.info("Password for user updated", user=user)
 
     return {"message": "Password updated successfully"}

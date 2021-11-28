@@ -5,23 +5,28 @@ description = "Decrypto API"
 authors     = [ "Your Name <you@example.com>" ]
 
 [tool.poetry.dependencies]
-python            = "^3.9"
-alembic           = "^1.7.5"
-colorama          = "^0.4.4"
-emails            = "^0.6"
-fastapi           = "^0.70.0"
-gunicorn          = "^20.1.0"
-Jinja2            = "^3.0.3"
-passlib           = { extras = [ "argon2" ], version = "^1.7.4" }
-psycopg2          = "^2.9.2"
-pydantic          = { extras = [ "dotenv", "email" ], version = "^1.8.2" }
-python-jose       = { extras = [ "cryptography" ], version = "^3.3.0" }
-python-multipart  = "^0.0.5"
-SQLAlchemy        = "^1.4.27"
+python = "^3.9"
+alembic = "^1.7.5"
+asyncpg = "^0.24.0"
+colorama = "^0.4.4"
+Cython = "^0.29.24"
+emails = "^0.6"
+fastapi = "^0.70.0"
+gunicorn = "^20.1.0"
+Jinja2 = "^3.0.3"
+passlib = { extras = [ "argon2" ], version = "^1.7.4" }
+psycopg2 = "^2.9.2"
+python-jose = { extras = [ "cryptography" ], version = "^3.3.0" }
+python-multipart = "^0.0.5"
+SQLAlchemy = { extras = [ "asyncio" ], version = "^1.4.27" }
 starlette-context = "^0.3.3"
-structlog         = "^21.3.0"
-tenacity          = "^8.0.1"
-uvicorn           = { extras = [ "standard" ], version = "^0.15.0" }
+structlog = "^21.3.0"
+tenacity = "^8.0.1"
+uvicorn = { extras = [ "standard" ], version = "^0.15.0" }
+pydantic = { git = "https://github.com/samuelcolvin/pydantic.git", rev = "cc1cb4826c74ac5b651ef2d80c3478428a9950ca", extras = [
+    "dotenv",
+    "email",
+] }
 
 [tool.poetry.dev-dependencies]
 asgi-lifespan     = { version = "^1.0.1", allow-prereleases = true }
@@ -32,9 +37,9 @@ isort             = { version = "^5.10.1", allow-prereleases = true }
 mypy              = { version = "^0.910", allow-prereleases = true }
 pylint            = { version = "^2.11.1", allow-prereleases = true }
 pytest            = { version = "^6.2.5", allow-prereleases = true }
+pytest-asyncio    = { version = "^0.16.0", allow-prereleases = true }
 pytest-cov        = { version = "^3.0.0", allow-prereleases = true }
 sqlalchemy2-stubs = { version = "^0.0.2a19", allow-prereleases = true }
-pytest-asyncio    = { version = "^0.16.0", allow-prereleases = true }
 
 [build-system]
 requires      = [ "poetry-core>=1.0.0" ]

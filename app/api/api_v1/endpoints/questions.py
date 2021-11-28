@@ -14,7 +14,7 @@ from fastapi import (
     UploadFile,
     status,
 )
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import LOGGER, crud, models, schemas
 from app.api import dependencies
@@ -30,7 +30,7 @@ router = APIRouter(prefix="/questions", tags=["questions"])
 async def read_questions(
     skip: int = 0,
     limit: int = 100,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -41,7 +41,7 @@ async def read_questions(
     """
 
     await LOGGER.info("Superuser listed questions", skip=skip, limit=limit)
-    questions = crud.question.get_multi(db_session, skip=skip, limit=limit)
+    questions = await crud.question.get_multi(db_session, skip=skip, limit=limit)
 
     return questions
 
@@ -55,7 +55,7 @@ async def create_question(
     *,
     answer: str = Form(...),
     image: UploadFile = Depends(dependencies.get_image),
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -64,7 +64,7 @@ async def create_question(
     **Needs superuser privileges.**
     """
 
-    question = crud.question.get_by_answer(db_session, answer=answer)
+    question = await crud.question.get_by_answer(db_session, answer=answer)
 
     if question:
         await LOGGER.error("Question with answer already exists", answer=answer)
@@ -80,7 +80,7 @@ async def create_question(
         "answer": answer,
     }
     question_in = schemas.QuestionCreate(**question_data)
-    question = crud.question.create(db_session, obj_in=question_in)
+    question = await crud.question.create(db_session, obj_in=question_in)
     await LOGGER.info("Superuser created new question", question=question)
 
     return question
@@ -99,7 +99,7 @@ async def create_question(
 async def read_question_by_id(
     question_id: int,
     image: Optional[bool] = None,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -110,7 +110,7 @@ async def read_question_by_id(
     **Needs superuser privileges.**
     """
 
-    question = crud.question.get(db_session, identifier=question_id)
+    question = await crud.question.get(db_session, identifier=question_id)
 
     if not question:
         await LOGGER.error("Question does not exist", question_id=question_id)
@@ -146,7 +146,7 @@ async def update_question(
     *,
     question_id: int,
     question_in: schemas.QuestionUpdate,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -155,7 +155,7 @@ async def update_question(
     **Needs superuser privileges.**
     """
 
-    question = crud.question.get(db_session, identifier=question_id)
+    question = await crud.question.get(db_session, identifier=question_id)
 
     if not question:
         await LOGGER.error("Question does not exist", question_id=question_id)
@@ -166,7 +166,7 @@ async def update_question(
         )
 
     assert question_in.answer is not None
-    duplicate_answer = crud.question.get_by_answer(
+    duplicate_answer = await crud.question.get_by_answer(
         db_session, answer=question_in.answer
     )
 
@@ -185,7 +185,7 @@ async def update_question(
         question=question,
         answer=question_in.answer,
     )
-    question = crud.question.update(
+    question = await crud.question.update(
         db_session, db_obj=question, obj_in=question_in, use_jsonable_encoder=False
     )
     await LOGGER.info("Superuser updated question's answer by ID", question=question)
@@ -200,7 +200,7 @@ async def update_question(
 )
 async def delete_question(
     question_id: int,
-    db_session: Session = Depends(dependencies.get_db_session),
+    db_session: AsyncSession = Depends(dependencies.get_db_session),
     _: models.User = Depends(dependencies.get_current_superuser),
 ) -> Any:
     """
@@ -209,7 +209,7 @@ async def delete_question(
     **Needs superuser privileges.**
     """
 
-    question = crud.question.get(db_session, identifier=question_id)
+    question = await crud.question.get(db_session, identifier=question_id)
 
     if not question:
         await LOGGER.error("Question does not exist", question_id=question_id)
@@ -220,7 +220,7 @@ async def delete_question(
         )
 
     await LOGGER.info("Superuser initiated question deletion", question=question)
-    crud.question.remove(db_session, identifier=question_id)
+    await crud.question.remove(db_session, identifier=question_id)
     await LOGGER.info("Superuser deleted question by ID", question=question)
 
     return {"message": "Question deleted successfully"}

@@ -8,6 +8,7 @@ from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 from sqlalchemy.orm import Mapped, relationship
 
 from app.db.base_class import Base
+from app.utils import project_name_lowercase_no_spaces
 
 if TYPE_CHECKING:  # pragma: no cover
     from app.models import Question
@@ -31,20 +32,17 @@ class User(Base):  # pylint: disable=too-few-public-methods
 
     # SQLAlchemy relationship.
     # This doesn't add an attribute/column to the table in the database, but provides an
-    # attribute in the model instance whose value is populated (by SQLAlchemy) when it
-    # is first accessed. The value is populated by using the foreign key and performing
-    # a suitable JOIN operation.
+    # attribute in the model instance whose value is populated (by SQLAlchemy) eagerly
+    # (we can't use lazy loading with async SQLAlchemy dialects). The value is populated
+    # by using the foreign key and performing a suitable JOIN operation.
     # In this case, we explicitly specify the foreign keys and the JOIN conditions that
     # SQLAlchemy should use to populate the value.
     question: Mapped["Question"] = relationship(
         "Question",
-        foreign_keys=[question_number],
-        primaryjoin=(
-            "and_("
-            "User.question_number == remote(QuestionOrderItem.question_number), "
-            "QuestionOrderItem.question_id == foreign(Question.id)"
-            ")"
-        ),
+        secondary=f"{project_name_lowercase_no_spaces()}_questionorderitem",
+        primaryjoin="User.question_number == QuestionOrderItem.question_number",
+        secondaryjoin="QuestionOrderItem.question_id == foreign(Question.id)",
+        lazy="selectin",
         uselist=False,
         viewonly=True,
     )
