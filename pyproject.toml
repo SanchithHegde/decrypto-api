@@ -16,6 +16,10 @@ gunicorn = "^20.1.0"
 Jinja2 = "^3.0.3"
 passlib = { extras = [ "argon2" ], version = "^1.7.4" }
 psycopg2 = "^2.9.2"
+pydantic = { git = "https://github.com/samuelcolvin/pydantic.git", rev = "cc1cb4826c74ac5b651ef2d80c3478428a9950ca", extras = [
+    "dotenv",
+    "email",
+] }
 python-jose = { extras = [ "cryptography" ], version = "^3.3.0" }
 python-multipart = "^0.0.5"
 SQLAlchemy = { extras = [ "asyncio" ], version = "^1.4.27" }
@@ -23,10 +27,6 @@ starlette-context = "^0.3.3"
 structlog = "^21.3.0"
 tenacity = "^8.0.1"
 uvicorn = { extras = [ "standard" ], version = "^0.15.0" }
-pydantic = { git = "https://github.com/samuelcolvin/pydantic.git", rev = "cc1cb4826c74ac5b651ef2d80c3478428a9950ca", extras = [
-    "dotenv",
-    "email",
-] }
 
 [tool.poetry.dev-dependencies]
 asgi-lifespan     = { version = "^1.0.1", allow-prereleases = true }
