@@ -31,6 +31,6 @@ async def test_email(
     """
 
     await LOGGER.info("Superuser initiated test email", email=email_to)
-    send_test_email(email_to=email_to)
+    await send_test_email(email_to=email_to)
 
     return {"message": "Test email sent"}
