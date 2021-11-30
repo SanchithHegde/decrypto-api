@@ -48,8 +48,17 @@ tags_metadata = [
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
+    version="1.0.0",
     openapi_tags=tags_metadata,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    contact={
+        "name": "Sanchith Hegde",
+        "url": "https://github.com/SanchithHegde",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://github.com/SanchithHegde/decrypto-api/blob/main/LICENSE",
+    },
 )
 
 

@@ -3,6 +3,7 @@ name        = "decrypto-api"
 version     = "0.1.0"
 description = "Decrypto API"
 authors     = [ "Your Name <you@example.com>" ]
+license     = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
