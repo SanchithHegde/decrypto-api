@@ -27,11 +27,15 @@ async def user_authentication_headers(
 
 
 async def create_random_user(db_session: AsyncSession) -> User:
-    email = random_email()
-    password = random_lower_string()
     full_name = random_lower_string()
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
     user_in = UserCreate(
-        username=email, email=email, password=password, full_name=full_name
+        full_name=full_name,
+        email=email,
+        username=username,
+        password=password,
     )
     user = await crud.user.create(db_session=db_session, obj_in=user_in)
 
@@ -52,8 +56,9 @@ async def authentication_token_from_email(
 
     if not user:
         full_name = random_lower_string()
+        username = random_lower_string()
         user_in_create = UserCreate(
-            username=email, email=email, password=password, full_name=full_name
+            username=username, email=email, password=password, full_name=full_name
         )
         user = await crud.user.create(db_session, obj_in=user_in_create)
 

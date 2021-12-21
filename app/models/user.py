@@ -22,6 +22,7 @@ class User(Base):  # pylint: disable=too-few-public-methods
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_superuser = Column(Boolean(), default=False)
     question_number = Column(Integer, nullable=False, default=1)
@@ -53,6 +54,7 @@ class User(Base):  # pylint: disable=too-few-public-methods
             f"id: {self.id}, "
             f"full_name: {self.full_name}, "
             f"email: {self.email}, "
+            f"username: {self.username}, "
             f"is_superuser: {self.is_superuser}, "
             f"question_number: {self.question_number}, "
             f"rank: {self.rank}, "

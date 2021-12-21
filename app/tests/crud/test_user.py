@@ -14,46 +14,75 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_create_user(db_session: AsyncSession) -> None:
-    email = random_email()
-    password = random_lower_string()
     full_name = random_lower_string()
-    user_in = UserCreate(email=email, password=password, full_name=full_name)
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(
+        full_name=full_name, email=email, username=username, password=password
+    )
     user = await crud.user.create(db_session, obj_in=user_in)
 
     assert user.email == email
     assert hasattr(user, "hashed_password")
 
 
-async def test_authenticate_user(db_session: AsyncSession) -> None:
-    email = random_email()
-    password = random_lower_string()
+async def test_authenticate_user_with_email(db_session: AsyncSession) -> None:
     full_name = random_lower_string()
-    user_in = UserCreate(email=email, password=password, full_name=full_name)
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(
+        full_name=full_name, email=email, username=username, password=password
+    )
     user = await crud.user.create(db_session, obj_in=user_in)
 
     authenticated_user = await crud.user.authenticate(
-        db_session, email=email, password=password
+        db_session, username=email, password=password
     )
 
     assert authenticated_user
     assert user.email == authenticated_user.email
 
 
+async def test_authenticate_user_with_username(db_session: AsyncSession) -> None:
+    full_name = random_lower_string()
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(
+        full_name=full_name, email=email, username=username, password=password
+    )
+    user = await crud.user.create(db_session, obj_in=user_in)
+
+    authenticated_user = await crud.user.authenticate(
+        db_session, username=username, password=password
+    )
+
+    assert authenticated_user
+    assert user.username == authenticated_user.username
+
+
 async def test_not_authenticate_user(db_session: AsyncSession) -> None:
     email = random_email()
     password = random_lower_string()
 
-    user = await crud.user.authenticate(db_session, email=email, password=password)
+    user = await crud.user.authenticate(db_session, username=email, password=password)
 
     assert user is None
 
 
 async def test_check_if_user_is_superuser(db_session: AsyncSession) -> None:
-    email = random_email()
-    password = random_lower_string()
     full_name = random_lower_string()
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
     user_in = UserCreate(
-        email=email, password=password, full_name=full_name, is_superuser=True
+        full_name=full_name,
+        email=email,
+        username=username,
+        password=password,
+        is_superuser=True,
     )
     user = await crud.user.create(db_session, obj_in=user_in)
 
@@ -63,10 +92,13 @@ async def test_check_if_user_is_superuser(db_session: AsyncSession) -> None:
 
 
 async def test_check_if_user_is_superuser_normal_user(db_session: AsyncSession) -> None:
-    username = random_email()
-    password = random_lower_string()
     full_name = random_lower_string()
-    user_in = UserCreate(email=username, password=password, full_name=full_name)
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(
+        full_name=full_name, email=email, username=username, password=password
+    )
     user = await crud.user.create(db_session, obj_in=user_in)
 
     is_superuser = crud.user.is_superuser(user)
@@ -75,11 +107,16 @@ async def test_check_if_user_is_superuser_normal_user(db_session: AsyncSession) 
 
 
 async def test_get_user(db_session: AsyncSession) -> None:
-    password = random_lower_string()
-    username = random_email()
     full_name = random_lower_string()
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
     user_in = UserCreate(
-        email=username, password=password, full_name=full_name, is_superuser=True
+        full_name=full_name,
+        email=email,
+        username=username,
+        password=password,
+        is_superuser=True,
     )
     user = await crud.user.create(db_session, obj_in=user_in)
 
@@ -88,15 +125,21 @@ async def test_get_user(db_session: AsyncSession) -> None:
 
     assert user_2
     assert user.email == user_2.email
+    assert user.username == user_2.username
     assert jsonable_encoder(user) == jsonable_encoder(user_2)
 
 
 async def test_update_user(db_session: AsyncSession) -> None:
-    password = random_lower_string()
-    email = random_email()
     full_name = random_lower_string()
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
     user_in = UserCreate(
-        email=email, password=password, full_name=full_name, is_superuser=True
+        full_name=full_name,
+        email=email,
+        username=username,
+        password=password,
+        is_superuser=True,
     )
     user = await crud.user.create(db_session, obj_in=user_in)
     new_password = random_lower_string()
@@ -110,15 +153,21 @@ async def test_update_user(db_session: AsyncSession) -> None:
     assert user_2
     assert user_2.hashed_password  # Required for mypy
     assert user.email == user_2.email
+    assert user.username == user_2.username
     assert verify_password(new_password, user_2.hashed_password)
 
 
 async def test_delete_user(db_session: AsyncSession) -> None:
-    password = random_lower_string()
-    username = random_email()
     full_name = random_lower_string()
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
     user_in = UserCreate(
-        email=username, password=password, full_name=full_name, is_superuser=True
+        full_name=full_name,
+        email=email,
+        username=username,
+        password=password,
+        is_superuser=True,
     )
     user = await crud.user.create(db_session, obj_in=user_in)
 
@@ -127,6 +176,7 @@ async def test_delete_user(db_session: AsyncSession) -> None:
 
     assert deleted_user.id == user.id
     assert deleted_user.email == user.email
+    assert deleted_user.username == user.username
     assert deleted_user.full_name == user.full_name
     assert deleted_user.is_superuser == user.is_superuser
     assert deleted_user.dict() == user.dict()
@@ -137,10 +187,13 @@ async def test_delete_user(db_session: AsyncSession) -> None:
 
 
 async def test_user_positive_rank_on_creation(db_session: AsyncSession) -> None:
-    email = random_email()
-    password = random_lower_string()
     full_name = random_lower_string()
-    user_in = UserCreate(email=email, password=password, full_name=full_name)
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(
+        full_name=full_name, email=email, username=username, password=password
+    )
     user = await crud.user.create(db_session, obj_in=user_in)
 
     assert user.rank and user.rank > 0
@@ -152,10 +205,13 @@ async def test_user_higher_rank_on_question_number_increase(
 ) -> None:
     # "Higher rank" considering rank 1 is higher than rank 2
 
-    email1 = random_email()
-    password1 = random_lower_string()
     full_name1 = random_lower_string()
-    user_in1 = UserCreate(email=email1, password=password1, full_name=full_name1)
+    email1 = random_email()
+    username1 = random_lower_string()
+    password1 = random_lower_string()
+    user_in1 = UserCreate(
+        full_name=full_name1, email=email1, username=username1, password=password1
+    )
     user1 = await crud.user.create(db_session, obj_in=user_in1)
     assert user1.id
     assert user1.question_number
@@ -164,10 +220,13 @@ async def test_user_higher_rank_on_question_number_increase(
     # This test uses 2 users because if user1's previous rank was 1, then it will remain
     # as rank 1 after updating. So, we ensure there's at least one user above user1 in
     # the leaderboard.
-    email2 = random_email()
-    password2 = random_lower_string()
     full_name2 = random_lower_string()
-    user_in2 = UserCreate(email=email2, password=password2, full_name=full_name2)
+    email2 = random_email()
+    username2 = random_lower_string()
+    password2 = random_lower_string()
+    user_in2 = UserCreate(
+        full_name=full_name2, email=email2, username=username2, password=password2
+    )
     user2 = await crud.user.create(db_session, obj_in=user_in2)
     assert user2.id
 
@@ -208,20 +267,26 @@ async def test_user_higher_rank_on_question_number_increase(
 async def test_user_lower_rank_on_another_user_same_rank_question_number_increase(
     db_session: AsyncSession,
 ) -> None:
-    email1 = random_email()
-    password1 = random_lower_string()
     full_name1 = random_lower_string()
-    user_in1 = UserCreate(email=email1, password=password1, full_name=full_name1)
+    email1 = random_email()
+    username1 = random_lower_string()
+    password1 = random_lower_string()
+    user_in1 = UserCreate(
+        full_name=full_name1, email=email1, username=username1, password=password1
+    )
     user1 = await crud.user.create(db_session, obj_in=user_in1)
     assert user1.id
     assert user1.question_number
     assert user1.rank
     user1_rank = user1.rank
 
-    email2 = random_email()
-    password2 = random_lower_string()
     full_name2 = random_lower_string()
-    user_in2 = UserCreate(email=email2, password=password2, full_name=full_name2)
+    email2 = random_email()
+    username2 = random_lower_string()
+    password2 = random_lower_string()
+    user_in2 = UserCreate(
+        full_name=full_name2, email=email2, username=username2, password=password2
+    )
     user2 = await crud.user.create(db_session, obj_in=user_in2)
     assert user2.id
 

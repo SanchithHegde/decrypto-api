@@ -38,17 +38,17 @@ async def login_access_token(
     """
 
     user = await crud.user.authenticate(
-        db_session, email=form_data.username, password=form_data.password
+        db_session, username=form_data.username, password=form_data.password
     )
 
     if not user:
         await LOGGER.error(
-            "Incorrect email address or password", email=form_data.username
+            "Incorrect username or password", username=form_data.username
         )
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email address or password",
+            detail="Incorrect username or password",
         )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

@@ -4,7 +4,7 @@ CRUD operations on `User` model instances.
 
 from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import get_password_hash, verify_password
@@ -27,6 +27,30 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         statement = select(User).where(User.email == email)
         return (await db_session.execute(statement)).scalar_one_or_none()
 
+    @staticmethod
+    async def get_by_username(
+        db_session: AsyncSession, *, username: str
+    ) -> Optional[User]:
+        """
+        Obtain user by username.
+        """
+
+        statement = select(User).where(User.username == username)
+        return (await db_session.execute(statement)).scalar_one_or_none()
+
+    @staticmethod
+    async def get_by_email_or_username(
+        db_session: AsyncSession, *, identifier: str
+    ) -> Optional[User]:
+        """
+        Obtain user by either email address or username.
+        """
+
+        statement = select(User).where(
+            or_(User.email == identifier, User.username == identifier)
+        )
+        return (await db_session.execute(statement)).scalar_one_or_none()
+
     async def create(self, db_session: AsyncSession, *, obj_in: UserCreate) -> User:
         """
         Create a new user and insert it into the database.
@@ -34,6 +58,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         user_obj = User(
             email=obj_in.email,
+            username=obj_in.username,
             hashed_password=get_password_hash(obj_in.password),
             full_name=obj_in.full_name,
             is_superuser=obj_in.is_superuser,
@@ -105,16 +130,16 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return user_obj
 
     async def authenticate(
-        self, db_session: AsyncSession, *, email: str, password: str
+        self, db_session: AsyncSession, *, username: str, password: str
     ) -> Optional[User]:
         """
-        Verifies that email address and password provided are correct.
+        Verifies that username (or email address) and password provided are correct.
 
-        Returns `None` if either the email address or the password are incorrect, the
-        `User` instance if the details are correct.
+        Returns `None` if either the username or the password are incorrect, the `User`
+        instance if the details are correct.
         """
 
-        user_obj = await self.get_by_email(db_session, email=email)
+        user_obj = await self.get_by_email_or_username(db_session, identifier=username)
 
         # User not found / incorrect email address
         if not user_obj:

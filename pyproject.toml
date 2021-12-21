@@ -37,6 +37,7 @@ pytest            = { version = "^6.2.5", allow-prereleases = true }
 pytest-asyncio    = { version = "^0.16.0", allow-prereleases = true }
 pytest-cov        = { version = "^3.0.0", allow-prereleases = true }
 sqlalchemy2-stubs = { version = "^0.0.2a19", allow-prereleases = true }
+pre-commit        = { version = "^2.16.0", allow-prereleases = true }
 
 [build-system]
 requires      = [ "poetry-core>=1.0.0" ]
@@ -59,7 +60,7 @@ known_first_party = [ "app" ]
 
 [tool.mypy]
 disallow_untyped_defs = true
-plugins               = [ "sqlalchemy.ext.mypy.plugin" ]
+plugins               = [ "pydantic.mypy", "sqlalchemy.ext.mypy.plugin" ]
 
 [tool.pylint.master]
 extension-pkg-whitelist = "pydantic"

@@ -76,6 +76,7 @@ jobs:
           PROJECT_NAME: "Decrypto"
           SECRET_KEY: "58ca50d1ced0317f38781111481d6daf10e41e925ebf70acf357dfb8b678e208"
           FIRST_SUPERUSER: "username@example.com"
+          FIRST_SUPERUSER_USERNAME: "username"
           FIRST_SUPERUSER_PASSWORD: "user_password"
           FIRST_SUPERUSER_NAME: "Username"
           USERS_OPEN_REGISTRATION: "True"

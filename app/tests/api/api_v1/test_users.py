@@ -49,10 +49,16 @@ async def test_create_user_new_email(
     superuser_token_headers: Dict[str, str],
     db_session: AsyncSession,
 ) -> None:
-    username = random_email()
-    password = random_lower_string()
     full_name = random_lower_string()
-    data = {"email": username, "password": password, "full_name": full_name}
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
+    data = {
+        "full_name": full_name,
+        "email": email,
+        "username": username,
+        "password": password,
+    }
     response = await client.post(
         f"{settings.API_V1_STR}/users/",
         headers=superuser_token_headers,
@@ -62,10 +68,11 @@ async def test_create_user_new_email(
     assert 200 <= response.status_code < 300
 
     created_user = response.json()
-    user = await crud.user.get_by_email(db_session, email=username)
+    user = await crud.user.get_by_email(db_session, email=email)
 
     assert user
     assert user.email == created_user["email"]
+    assert user.username == created_user["username"]
 
 
 async def test_get_existing_user(
@@ -88,6 +95,7 @@ async def test_get_existing_user(
 
     assert existing_user
     assert existing_user.email == api_user["email"]
+    assert existing_user.username == api_user["username"]
 
 
 async def test_get_not_existing_user(
@@ -142,12 +150,20 @@ async def test_create_user_existing_username(
     superuser_token_headers: Dict[str, str],
     db_session: AsyncSession,
 ) -> None:
-    username = random_email()
-    password = random_lower_string()
     full_name = random_lower_string()
-    user_in = UserCreate(email=username, password=password, full_name=full_name)
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(
+        full_name=full_name, email=email, username=username, password=password
+    )
     await crud.user.create(db_session, obj_in=user_in)
-    data = {"email": username, "password": password, "full_name": full_name}
+    data = {
+        "full_name": full_name,
+        "email": email,
+        "username": username,
+        "password": password,
+    }
     response = await client.post(
         f"{settings.API_V1_STR}/users/",
         headers=superuser_token_headers,
@@ -198,9 +214,10 @@ async def test_update_user_normal_user_me(
     client: AsyncClient, normal_user_token_headers: Dict[str, str]
 ) -> None:
     data = {
-        "email": random_email(),
-        "password": random_lower_string(),
         "full_name": random_lower_string(),
+        "email": random_email(),
+        "username": random_lower_string(),
+        "password": random_lower_string(),
     }
     response = await client.put(
         f"{settings.API_V1_STR}/users/me",
@@ -212,6 +229,7 @@ async def test_update_user_normal_user_me(
     assert current_user
     assert current_user["is_superuser"] is False
     assert current_user["email"] == data["email"]
+    assert current_user["username"] == data["username"]
     assert current_user["full_name"] == data["full_name"]
 
 
@@ -220,9 +238,10 @@ async def test_update_user_normal_user_me(
 )
 async def test_create_user_open(client: AsyncClient) -> None:
     data = {
-        "email": random_email(),
-        "password": random_lower_string(),
         "full_name": random_lower_string(),
+        "email": random_email(),
+        "username": random_lower_string(),
+        "password": random_lower_string(),
     }
     response = await client.post(
         f"{settings.API_V1_STR}/users/open",
@@ -233,6 +252,7 @@ async def test_create_user_open(client: AsyncClient) -> None:
     assert current_user
     assert current_user["is_superuser"] is False
     assert current_user["email"] == data["email"]
+    assert current_user["username"] == data["username"]
     assert current_user["full_name"] == data["full_name"]
 
 
@@ -242,12 +262,20 @@ async def test_create_user_open(client: AsyncClient) -> None:
 async def test_create_user_open_existing_username(
     client: AsyncClient, db_session: AsyncSession
 ) -> None:
-    username = random_email()
-    password = random_lower_string()
     full_name = random_lower_string()
-    user_in = UserCreate(email=username, password=password, full_name=full_name)
+    email = random_email()
+    username = random_lower_string()
+    password = random_lower_string()
+    user_in = UserCreate(
+        full_name=full_name, email=email, username=username, password=password
+    )
     await crud.user.create(db_session, obj_in=user_in)
-    data = {"email": username, "password": password, "full_name": full_name}
+    data = {
+        "full_name": full_name,
+        "email": email,
+        "username": username,
+        "password": password,
+    }
     response = await client.post(
         f"{settings.API_V1_STR}/users/open",
         json=data,
@@ -263,8 +291,9 @@ async def test_update_user_existing_user(
 ) -> None:
     user = await create_random_user(db_session)
     data = {
-        "email": random_email(),
         "full_name": random_lower_string(),
+        "email": random_email(),
+        "username": random_lower_string(),
         "is_superuser": True,
     }
     response = await client.put(
@@ -276,8 +305,9 @@ async def test_update_user_existing_user(
 
     assert api_user
     assert api_user["is_superuser"]
-    assert api_user["email"] == data["email"]
     assert api_user["full_name"] == data["full_name"]
+    assert api_user["email"] == data["email"]
+    assert api_user["username"] == data["username"]
 
 
 async def test_update_user_not_existing_user(
@@ -509,4 +539,4 @@ async def test_retrieve_leaderboard(
     for user in all_users:
         assert "question_number" in user
         assert "rank" in user
-        assert "full_name" in user
+        assert "username" in user

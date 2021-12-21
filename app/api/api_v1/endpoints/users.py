@@ -55,6 +55,7 @@ async def create_user(
     **Needs superuser privileges.**
     """
 
+    # Email should be unique
     user = await crud.user.get_by_email(db_session, email=user_in.email)
 
     if user:
@@ -63,6 +64,19 @@ async def create_user(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The user with this email address already exists in the system.",
+        )
+
+    # Username should be unique
+    user = await crud.user.get_by_username(db_session, username=user_in.username)
+
+    if user:
+        await LOGGER.error(
+            "User with username already exists", username=user_in.username
+        )
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user with this username already exists in the system.",
         )
 
     user = await crud.user.create(db_session, obj_in=user_in)
@@ -82,6 +96,7 @@ async def update_user_me(
     password: str = Body(None),
     full_name: str = Body(None),
     email: EmailStr = Body(None),
+    username: schemas.Username = Body(None),
     db_session: AsyncSession = Depends(dependencies.get_db_session),
     current_user: models.User = Depends(dependencies.get_current_user),
 ) -> Any:
@@ -101,11 +116,15 @@ async def update_user_me(
     if email is not None:
         user_in.email = email
 
+    if username is not None:
+        user_in.username = username
+
     temp_password = "[REDACTED]" if password is not None else None
     await LOGGER.info(
         "User initiated an update of their own details",
-        email=email,
         full_name=full_name,
+        email=email,
+        username=username,
         password=temp_password,
     )
     user = await crud.user.update(db_session, db_obj=current_user, obj_in=user_in)
@@ -138,6 +157,7 @@ async def create_user_open(
     *,
     full_name: str = Body(...),
     email: EmailStr = Body(...),
+    username: schemas.Username = Body(...),
     password: str = Body(...),
     db_session: AsyncSession = Depends(dependencies.get_db_session),
 ) -> Any:
@@ -155,10 +175,13 @@ async def create_user_open(
 
     await LOGGER.info(
         "New user registration initiated",
-        email=email,
         full_name=full_name,
+        email=email,
+        username=username,
         password="[REDACTED]",
     )
+
+    # Email should be unique
     user = await crud.user.get_by_email(db_session, email=email)
 
     if user:
@@ -169,7 +192,20 @@ async def create_user_open(
             detail="The user with this email address already exists in the system",
         )
 
-    user_in = schemas.UserCreate(password=password, email=email, full_name=full_name)
+    # Username should be unique
+    user = await crud.user.get_by_username(db_session, username=username)
+
+    if user:
+        await LOGGER.error("User with username already exists", username=username)
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user with this username already exists in the system",
+        )
+
+    user_in = schemas.UserCreate(
+        full_name=full_name, email=email, username=username, password=password
+    )
     user = await crud.user.create(db_session, obj_in=user_in)
     await LOGGER.info("New user registered", user=user)
 
