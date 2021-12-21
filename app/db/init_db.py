@@ -27,9 +27,10 @@ async def init_db(db_session: AsyncSession) -> None:
 
     if not user:
         user_in = schemas.UserCreate(
-            email=settings.FIRST_SUPERUSER,
-            password=settings.FIRST_SUPERUSER_PASSWORD,
             full_name=settings.FIRST_SUPERUSER_NAME,
+            email=settings.FIRST_SUPERUSER,
+            username=settings.FIRST_SUPERUSER_USERNAME,
+            password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
         user = await crud.user.create(db_session, obj_in=user_in)
