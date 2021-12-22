@@ -3,6 +3,7 @@ API endpoints for user operations.
 """
 
 import base64
+from datetime import datetime, timezone
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
@@ -225,6 +226,7 @@ async def create_user_open(
             "content": {"image/jpeg": {}, "image/png": {}},
         },
         307: {"description": "User completed answering all questions"},
+        400: {"description": "Contest yet to begin or already ended"},
     },
     summary="Obtain the current question for the user",
 )
@@ -237,8 +239,31 @@ async def read_user_question(
 
     If `image` is `true`, returns the image with the appropriate `Content-Type` header.
 
-    Redirects with a `307` status code if the user completed answering all questions.
+    * Redirects with a `307` status code if the user completed answering all questions.
+    * Returns a `400` status code if the contest is yet to begin or has already ended.
     """
+
+    if (
+        settings.EVENT_START_TIME is not None
+        and datetime.now(tz=timezone.utc) < settings.EVENT_START_TIME
+    ):
+        await LOGGER.info("Contest has not started", user=current_user)
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please wait, the contest is yet to begin",
+        )
+
+    if (
+        settings.EVENT_END_TIME is not None
+        and datetime.now(tz=timezone.utc) > settings.EVENT_END_TIME
+    ):
+        await LOGGER.info("Contest has ended", user=current_user)
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Sorry, the contest has ended",
+        )
 
     await LOGGER.info("User accessed their question")
     question = current_user.question
@@ -259,7 +284,10 @@ async def read_user_question(
 @router.post(
     "/answer",
     response_model=schemas.Message,
-    responses={303: {"description": "User completed answering all questions"}},
+    responses={
+        303: {"description": "User completed answering all questions"},
+        400: {"description": "Contest yet to begin or already ended"},
+    },
     summary="Verify the answer provided by the user for the current question",
 )
 async def verify_user_answer(
@@ -270,8 +298,31 @@ async def verify_user_answer(
     """
     Verify the answer provided by the user for the current question.
 
-    Redirects with a `303` status code if the user completed answering all questions.
+    * Redirects with a `303` status code if the user completed answering all questions.
+    * Returns a `400` status code if the contest is yet to begin or has already ended.
     """
+
+    if (
+        settings.EVENT_START_TIME is not None
+        and datetime.now(tz=timezone.utc) < settings.EVENT_START_TIME
+    ):
+        await LOGGER.info("Contest has not started", user=current_user)
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please wait, the contest is yet to begin",
+        )
+
+    if (
+        settings.EVENT_END_TIME is not None
+        and datetime.now(tz=timezone.utc) > settings.EVENT_END_TIME
+    ):
+        await LOGGER.info("Contest has ended", user=current_user)
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Sorry, the contest has ended",
+        )
 
     question = current_user.question
     answer = answer_in.answer

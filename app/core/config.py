@@ -3,6 +3,7 @@ Application-wide configuration.
 """
 
 import secrets
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
@@ -139,6 +140,37 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
     FIRST_SUPERUSER_NAME: str
     USERS_OPEN_REGISTRATION: bool = False
+
+    EVENT_START_TIME: Optional[datetime] = None
+    EVENT_END_TIME: Optional[datetime] = None
+
+    @validator("EVENT_END_TIME")
+    def validate_start_time_end_time(  # pylint: disable=no-self-argument,no-self-use
+        cls, end_time: Optional[datetime], values: Dict[str, Any]
+    ) -> Optional[datetime]:
+        """
+        Validates start and end times.
+
+        EVENT_END_TIME must be a later point in time than EVENT_START_TIME.
+        """
+
+        start_time = values.get("EVENT_START_TIME")
+
+        if start_time is None and end_time is None:
+            return None
+
+        if start_time is None and end_time is not None:
+            raise ValueError("EVENT_START_TIME must be provided")
+
+        if start_time is not None and end_time is None:
+            raise ValueError("EVENT_END_TIME must be provided")
+
+        if start_time is not None and end_time is not None and start_time >= end_time:
+            raise ValueError(
+                "EVENT_END_TIME must be a later point in time than EVENT_START_TIME"
+            )
+
+        return end_time
 
     class Config:  # pylint: disable=too-few-public-methods
         """

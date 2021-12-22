@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 
+from datetime import datetime, timezone
 from typing import Dict
 
 import pytest
@@ -16,6 +17,18 @@ from app.tests.utils.user import authentication_token_from_email, create_random_
 from app.tests.utils.utils import random_email, random_int, random_lower_string
 
 pytestmark = pytest.mark.asyncio
+
+event_running = pytest.mark.skipif(
+    (
+        settings.EVENT_START_TIME is not None
+        and datetime.now(tz=timezone.utc) < settings.EVENT_START_TIME
+    )
+    or (
+        settings.EVENT_END_TIME is not None
+        and datetime.now(tz=timezone.utc) > settings.EVENT_END_TIME
+    ),
+    reason="Event not running",
+)
 
 
 async def test_get_users_superuser_me(
@@ -356,6 +369,7 @@ async def test_delete_user_not_existing_user(
     assert response.status_code == 404
 
 
+@event_running
 async def test_get_question(client: AsyncClient, db_session: AsyncSession) -> None:
     question_order_item = await create_random_question_order_item(db_session)
     question_number = question_order_item.question_number
@@ -379,6 +393,7 @@ async def test_get_question(client: AsyncClient, db_session: AsyncSession) -> No
     assert "content_type" in question_data
 
 
+@event_running
 async def test_get_question_image(
     client: AsyncClient, db_session: AsyncSession
 ) -> None:
@@ -406,6 +421,7 @@ async def test_get_question_image(
     assert response.headers[content_type_header] == png_content_type()
 
 
+@event_running
 async def test_get_question_redirect_if_none(
     client: AsyncClient, db_session: AsyncSession
 ) -> None:
@@ -427,6 +443,7 @@ async def test_get_question_redirect_if_none(
     assert response.status_code == 307
 
 
+@event_running
 async def test_get_question_redirect_if_none_allow_redirects(
     client: AsyncClient, db_session: AsyncSession
 ) -> None:
@@ -452,6 +469,7 @@ async def test_get_question_redirect_if_none_allow_redirects(
     assert "message" in message_json
 
 
+@event_running
 async def test_verify_answer_correct_answer(
     client: AsyncClient, db_session: AsyncSession
 ) -> None:
@@ -489,6 +507,7 @@ async def test_verify_answer_correct_answer(
     assert updated_user.rank >= old_rank
 
 
+@event_running
 async def test_verify_answer_incorrect_answer(
     client: AsyncClient, db_session: AsyncSession
 ) -> None:
