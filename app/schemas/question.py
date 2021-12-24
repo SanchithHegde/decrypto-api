@@ -2,10 +2,19 @@
 Pydantic schemas for handling questions.
 """
 
+import re
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+
+
+def process_answer(answer: str) -> str:
+    """
+    Converts answers to lowercase and removes any non-alphanumeric characters.
+    """
+
+    return re.sub(r"[^a-z0-9]", "", answer.lower())
 
 
 class QuestionBase(BaseModel):
@@ -25,6 +34,9 @@ class QuestionCreate(QuestionBase):
 
     answer: str
 
+    # Validators
+    _process_answer = validator("answer", allow_reuse=True)(process_answer)
+
 
 class QuestionUpdate(BaseModel):
     """
@@ -33,6 +45,9 @@ class QuestionUpdate(BaseModel):
     """
 
     answer: str
+
+    # Validators
+    _process_answer = validator("answer", allow_reuse=True)(process_answer)
 
 
 class QuestionInDBBase(BaseModel):
@@ -90,3 +105,6 @@ class Answer(BaseModel):
     """
 
     answer: str
+
+    # Validators
+    _process_answer = validator("answer", allow_reuse=True)(process_answer)
