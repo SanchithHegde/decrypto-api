@@ -34,7 +34,7 @@ isort             = { version = "^5.10.1", allow-prereleases = true }
 mypy              = { version = "^0.931", allow-prereleases = true }
 pylint            = { version = "^2.12.2", allow-prereleases = true }
 pytest            = { version = "^7.0.1", allow-prereleases = true }
-pytest-asyncio    = { version = "^0.18.1", allow-prereleases = true }
+pytest-asyncio    = { version = "^0.18.2", allow-prereleases = true }
 pytest-cov        = { version = "^3.0.0", allow-prereleases = true }
 sqlalchemy2-stubs = { version = "^0.0.2a20", allow-prereleases = true }
 pre-commit        = { version = "^2.17.0", allow-prereleases = true }
