@@ -32,7 +32,7 @@ docformatter      = { version = "^1.4", allow-prereleases = true }
 httpx             = { version = "^0.22.0", allow-prereleases = true }
 isort             = { version = "^5.10.1", allow-prereleases = true }
 mypy              = { version = "^0.942", allow-prereleases = true }
-pylint            = { version = "^2.12.2", allow-prereleases = true }
+pylint            = { version = "^2.13.0", allow-prereleases = true }
 pytest            = { version = "^7.1.1", allow-prereleases = true }
 pytest-asyncio    = { version = "^0.18.2", allow-prereleases = true }
 pytest-cov        = { version = "^3.0.0", allow-prereleases = true }
