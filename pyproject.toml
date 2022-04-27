@@ -19,7 +19,7 @@ psycopg2          = "^2.9.3"
 pydantic          = { version = "1.9.0", allow-prereleases = true, extras = [ "dotenv", "email" ] }
 python-jose       = { extras = [ "cryptography" ], version = "^3.3.0" }
 python-multipart  = "^0.0.5"
-SQLAlchemy        = { extras = [ "asyncio" ], version = "^1.4.35" }
+SQLAlchemy        = { extras = [ "asyncio" ], version = "^1.4.36" }
 starlette-context = "^0.3.3"
 structlog         = "^21.5.0"
 tenacity          = "^8.0.1"
