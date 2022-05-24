@@ -29,7 +29,7 @@ uvicorn           = { extras = [ "standard" ], version = "^0.17.6" }
 asgi-lifespan     = { version = "^1.0.1", allow-prereleases = true }
 black             = { version = "^22.3", allow-prereleases = true }
 docformatter      = { version = "^1.4", allow-prereleases = true }
-httpx             = { version = "^1.0.0b0", allow-prereleases = true }
+httpx             = { version = "^0.23.0", allow-prereleases = true }
 isort             = { version = "^5.10.1", allow-prereleases = true }
 mypy              = { version = "^0.950", allow-prereleases = true }
 pylint            = { version = "^3.0.0a4", allow-prereleases = true }
