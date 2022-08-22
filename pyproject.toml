@@ -28,7 +28,7 @@ uvicorn           = { extras = [ "standard" ], version = "^0.18.2" }
 [tool.poetry.dev-dependencies]
 asgi-lifespan     = { version = "^1.0.1", allow-prereleases = true }
 black             = { version = "^22.6", allow-prereleases = true }
-docformatter      = { version = "^1.4", allow-prereleases = true }
+docformatter      = { version = "^1.5", allow-prereleases = true }
 httpx             = { version = "^0.23.0", allow-prereleases = true }
 isort             = { version = "^5.10.1", allow-prereleases = true }
 mypy              = { version = "^0.971", allow-prereleases = true }
