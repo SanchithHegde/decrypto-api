@@ -23,7 +23,7 @@ SQLAlchemy        = { extras = [ "asyncio" ], version = "^1.4.40" }
 starlette-context = "^0.3.4"
 structlog         = "^22.1.0"
 tenacity          = "^8.0.1"
-uvicorn           = { extras = [ "standard" ], version = "^0.18.2" }
+uvicorn           = { extras = [ "standard" ], version = "^0.18.3" }
 
 [tool.poetry.dev-dependencies]
 asgi-lifespan     = { version = "^1.0.1", allow-prereleases = true }
