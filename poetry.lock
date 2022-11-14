@@ -65,11 +65,11 @@ tests = ["pytest"]
 
 [[package]]
 name = "asgi-lifespan"
-version = "1.0.1"
+version = "2.0.0"
 description = "Programmatic startup/shutdown of ASGI apps."
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 sniffio = "*"
@@ -1249,7 +1249,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "0e7fdff78bd8cb8f748e11fdf00d2bf89d394274e00c382ea6c7db41bfa72075"
+content-hash = "a8f6154175542f7592e3232dbef3a978bb284392a835059f88b48c0e7bc219c2"
 
 [metadata.files]
 alembic = [
@@ -1288,8 +1288,8 @@ argon2-cffi-bindings = [
     {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:5e00316dabdaea0b2dd82d141cc66889ced0cdcbfa599e8b471cf22c620c329a"},
 ]
 asgi-lifespan = [
-    {file = "asgi-lifespan-1.0.1.tar.gz", hash = "sha256:9a33e7da2073c4764bc79bd6136501d6c42f60e3d2168ba71235e84122eadb7f"},
-    {file = "asgi_lifespan-1.0.1-py3-none-any.whl", hash = "sha256:9ea969dc5eb5cf08e52c08dce6f61afcadd28112e72d81c972b1d8eb8691ab53"},
+    {file = "asgi-lifespan-2.0.0.tar.gz", hash = "sha256:d46a31ff681e9edf1f776c9f61cf8fa6274cc66fca8cb4f11e940b1183e18842"},
+    {file = "asgi_lifespan-2.0.0-py3-none-any.whl", hash = "sha256:420582b1786b238d035244415dc11536acdbcb24762cba1c5e9bddc565960277"},
 ]
 astroid = [
     {file = "astroid-2.11.5-py3-none-any.whl", hash = "sha256:14ffbb4f6aa2cf474a0834014005487f7ecd8924996083ab411e7fa0b508ce0b"},
