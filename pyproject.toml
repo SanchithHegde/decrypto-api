@@ -31,7 +31,7 @@ black             = { version = "^22.10", allow-prereleases = true }
 docformatter      = { version = "^1.5", allow-prereleases = true }
 httpx             = { version = "^0.23.0", allow-prereleases = true }
 isort             = { version = "^5.10.1", allow-prereleases = true }
-mypy              = { version = "^0.990", allow-prereleases = true }
+mypy              = { version = "^0.991", allow-prereleases = true }
 pylint            = { version = "^3.0.0a5", allow-prereleases = true }
 pytest            = { version = "^7.2.0", allow-prereleases = true }
 pytest-asyncio    = { version = "^0.20.2", allow-prereleases = true }
