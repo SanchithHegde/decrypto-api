@@ -1068,7 +1068,7 @@ full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyam
 
 [[package]]
 name = "starlette-context"
-version = "0.3.4"
+version = "0.3.5"
 description = "Access context in Starlette"
 category = "main"
 optional = false
@@ -1250,7 +1250,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "ae7ea1507f04659e28a04972db1617b514683b879d50b3570f57b409e6915115"
+content-hash = "28ae2558224f8d95087a6ba4069393624c6d630edfd71993c8533787934498a9"
 
 [metadata.files]
 alembic = [
@@ -2143,8 +2143,8 @@ starlette = [
     {file = "starlette-0.22.0.tar.gz", hash = "sha256:b092cbc365bea34dd6840b42861bdabb2f507f8671e642e8272d2442e08ea4ff"},
 ]
 starlette-context = [
-    {file = "starlette_context-0.3.4-py37-none-any.whl", hash = "sha256:b16bf17bd3ead7ded2f458aebf7f913744b9cf28305e16c69b435a6c6ddf1135"},
-    {file = "starlette_context-0.3.4.tar.gz", hash = "sha256:2d28e1838302fb5d5adacadc10fb73fb2d5cca1f0aa1e279698701cc96f1567c"},
+    {file = "starlette_context-0.3.5-py37-none-any.whl", hash = "sha256:d9eeccaafd4fad13abe662295b802c8a58a7e11a0d33f933f001212472619086"},
+    {file = "starlette_context-0.3.5.tar.gz", hash = "sha256:e6b9f905823860e9e36c013dbfcf770562f3b88bec21cb861fef2e0bd0615697"},
 ]
 structlog = [
     {file = "structlog-22.3.0-py3-none-any.whl", hash = "sha256:b403f344f902b220648fa9f286a23c0cc5439a5844d271fec40562dbadbc70ad"},
