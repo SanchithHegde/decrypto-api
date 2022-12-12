@@ -1079,7 +1079,7 @@ starlette = "*"
 
 [[package]]
 name = "structlog"
-version = "22.2.0"
+version = "22.3.0"
 description = "Structured Logging for Python"
 category = "main"
 optional = false
@@ -1250,7 +1250,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "d33b1c6aeb4d61a55e0ff0884a446c82ae777fea737c0fa64362fa6b7576c263"
+content-hash = "26a29278b0384d6769c62da5fb1950564ae53f4eb6e7a256cfde1b45d9f837dc"
 
 [metadata.files]
 alembic = [
@@ -2147,8 +2147,8 @@ starlette-context = [
     {file = "starlette_context-0.3.4.tar.gz", hash = "sha256:2d28e1838302fb5d5adacadc10fb73fb2d5cca1f0aa1e279698701cc96f1567c"},
 ]
 structlog = [
-    {file = "structlog-22.2.0-py3-none-any.whl", hash = "sha256:bb1aa189214c30372a8afaa592f9556756aeb690e1ad7eb34391d7b5fa0f09b2"},
-    {file = "structlog-22.2.0.tar.gz", hash = "sha256:4edfe1d9f15f8a4bf365a817f7182af5d610596c155434b7564bfe7d40c2753c"},
+    {file = "structlog-22.3.0-py3-none-any.whl", hash = "sha256:b403f344f902b220648fa9f286a23c0cc5439a5844d271fec40562dbadbc70ad"},
+    {file = "structlog-22.3.0.tar.gz", hash = "sha256:e7509391f215e4afb88b1b80fa3ea074be57a5a17d794bd436a5c949da023333"},
 ]
 tenacity = [
     {file = "tenacity-8.1.0-py3-none-any.whl", hash = "sha256:35525cd47f82830069f0d6b73f7eb83bc5b73ee2fff0437952cedf98b27653ac"},
