@@ -30,7 +30,7 @@ asgi-lifespan     = { version = "^2.0.0", allow-prereleases = true }
 black             = { version = "^22.12", allow-prereleases = true }
 docformatter      = { version = "^1.5", allow-prereleases = true }
 httpx             = { version = "^0.23.1", allow-prereleases = true }
-isort             = { version = "^5.11.1", allow-prereleases = true }
+isort             = { version = "^5.11.2", allow-prereleases = true }
 mypy              = { version = "^0.991", allow-prereleases = true }
 pylint            = { version = "^3.0.0a5", allow-prereleases = true }
 pytest            = { version = "^7.2.0", allow-prereleases = true }
