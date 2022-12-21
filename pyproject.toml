@@ -36,7 +36,7 @@ pylint            = { version = "^3.0.0a5", allow-prereleases = true }
 pytest            = { version = "^7.2.0", allow-prereleases = true }
 pytest-asyncio    = { version = "^0.20.3", allow-prereleases = true }
 pytest-cov        = { version = "^4.0.0", allow-prereleases = true }
-sqlalchemy2-stubs = { version = "^0.0.2a29", allow-prereleases = true }
+sqlalchemy2-stubs = { version = "^0.0.2a30", allow-prereleases = true }
 pre-commit        = { version = "^2.20.0", allow-prereleases = true }
 
 [build-system]
