@@ -33,7 +33,7 @@ httpx             = { version = "^0.23.3", allow-prereleases = true }
 isort             = { version = "^5.11.4", allow-prereleases = true }
 mypy              = { version = "^0.991", allow-prereleases = true }
 pylint            = { version = "^3.0.0a5", allow-prereleases = true }
-pytest            = { version = "^7.2.0", allow-prereleases = true }
+pytest            = { version = "^7.2.1", allow-prereleases = true }
 pytest-asyncio    = { version = "^0.20.3", allow-prereleases = true }
 pytest-cov        = { version = "^4.0.0", allow-prereleases = true }
 sqlalchemy2-stubs = { version = "^0.0.2a31", allow-prereleases = true }
