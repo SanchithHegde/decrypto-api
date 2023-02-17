@@ -20,7 +20,7 @@ pydantic          = { version = "1.10.5", allow-prereleases = true, extras = [ "
 python-jose       = { extras = [ "cryptography" ], version = "^3.3.0" }
 python-multipart  = "^0.0.5"
 SQLAlchemy        = { extras = [ "asyncio" ], version = "^2.0.3" }
-starlette-context = "^0.3.5"
+starlette-context = "^0.3.6"
 structlog         = "^22.3.0"
 tenacity          = "^8.2.1"
 uvicorn           = { extras = [ "standard" ], version = "^0.20.0" }

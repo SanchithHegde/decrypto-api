@@ -1958,14 +1958,14 @@ full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyam
 
 [[package]]
 name = "starlette-context"
-version = "0.3.5"
-description = "Access context in Starlette"
+version = "0.3.6"
+description = "Middleware for Starlette that allows you to store and access the context data of a request. Can be used with logging so logs automatically use request headers such as x-request-id or x-correlation-id."
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8,<4.0"
 files = [
-    {file = "starlette_context-0.3.5-py37-none-any.whl", hash = "sha256:d9eeccaafd4fad13abe662295b802c8a58a7e11a0d33f933f001212472619086"},
-    {file = "starlette_context-0.3.5.tar.gz", hash = "sha256:e6b9f905823860e9e36c013dbfcf770562f3b88bec21cb861fef2e0bd0615697"},
+    {file = "starlette_context-0.3.6-py3-none-any.whl", hash = "sha256:b14ce373fbb6895a2182a7104b9f63ba20c8db83444005fb9a844dd77ad9895c"},
+    {file = "starlette_context-0.3.6.tar.gz", hash = "sha256:d361a36ba2d4acca3ab680f917b25e281533d725374752d47607a859041958cb"},
 ]
 
 [package.dependencies]
@@ -2281,4 +2281,4 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "a9c9b88343e8756c04e1c791cff2ec1d82d08351053d5b4db6a37f1b0a598afc"
+content-hash = "f4ef53140f34e45e00d988d1188a6c12092e9b7981361793045f1219f656cc9a"
